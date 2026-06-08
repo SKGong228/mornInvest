@@ -17,7 +17,7 @@ function renderInline(value) {
 }
 
 function paragraphHtml(lines) {
-  return `<p style="margin:0 0 14px;font-size:15px;line-height:1.75;color:#111827;">${renderInline(
+  return `<p style="margin:0 0 14px;font-size:15px;line-height:1.75;color:#18212f;">${renderInline(
     lines.join("\n")
   ).replace(/\n/g, "<br>")}</p>`;
 }
@@ -25,7 +25,7 @@ function paragraphHtml(lines) {
 function listHtml(items, ordered) {
   const tag = ordered ? "ol" : "ul";
   const marginLeft = ordered ? "22px" : "20px";
-  return `<${tag} style="margin:0 0 16px ${marginLeft};padding:0;font-size:15px;line-height:1.75;color:#111827;">${items
+  return `<${tag} style="margin:0 0 16px ${marginLeft};padding:0;font-size:15px;line-height:1.75;color:#18212f;">${items
     .map(
       (item) =>
         `<li style="margin:0 0 8px;padding-left:4px;">${renderInline(item)}</li>`
@@ -44,12 +44,12 @@ function tableHtml(rows) {
   const header = parsedRows[0] || [];
   const bodyRows = parsedRows.slice(2);
 
-  return `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:14px;color:#111827;">
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:14px;color:#18212f;">
     <thead>
       <tr>${header
         .map(
           (cell) =>
-            `<th style="border:1px solid #d9dee8;background:#f8fafc;padding:9px 10px;text-align:left;font-weight:700;">${renderInline(cell)}</th>`
+            `<th style="border:1px solid #d9dee8;background:#f1f5f9;padding:9px 10px;text-align:left;font-weight:700;color:#0f172a;">${renderInline(cell)}</th>`
         )
         .join("")}</tr>
     </thead>
@@ -60,7 +60,7 @@ function tableHtml(rows) {
             `<tr>${row
               .map(
                 (cell) =>
-                  `<td style="border:1px solid #d9dee8;padding:9px 10px;vertical-align:top;">${renderInline(cell)}</td>`
+                  `<td style="border:1px solid #d9dee8;padding:9px 10px;vertical-align:top;background:#ffffff;">${renderInline(cell)}</td>`
               )
               .join("")}</tr>`
         )
@@ -131,9 +131,9 @@ function markdownToBasicHtml(markdown) {
       flushList();
       const level = heading[1].length;
       const styles = {
-        1: "font-size:24px;line-height:1.25;margin:0 0 18px;color:#111827;",
-        2: "font-size:18px;line-height:1.35;margin:26px 0 12px;color:#111827;",
-        3: "font-size:16px;line-height:1.4;margin:20px 0 10px;color:#111827;",
+        1: "font-size:24px;line-height:1.25;margin:0 0 18px;color:#0f172a;",
+        2: "font-size:18px;line-height:1.35;margin:28px 0 12px;color:#0f172a;border-top:1px solid #e5e7eb;padding-top:18px;",
+        3: "font-size:16px;line-height:1.4;margin:20px 0 10px;color:#0f766e;",
       };
       html.push(`<h${level} style="${styles[level]}">${renderInline(heading[2])}</h${level}>`);
       continue;
@@ -187,14 +187,18 @@ function markdownToPlainText(markdown) {
 function wrapEmailHtml(title, bodyHtml) {
   return `<!doctype html>
 <html lang="zh-CN">
-  <body style="margin:0;background:#f6f3ee;color:#111827;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;line-height:1.7;">
-    <main style="max-width:720px;margin:0 auto;padding:32px 20px;">
-      <div style="font-weight:800;color:#0f766e;margin-bottom:16px;">MornInvest</div>
-      <section style="background:#fff;border:1px solid #d9dee8;border-radius:8px;padding:28px;">
-        <h1 style="font-size:28px;line-height:1.2;margin:0 0 18px;">${escapeHtml(title)}</h1>
+  <body style="margin:0;background:#eef2f7;color:#18212f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',Arial,sans-serif;line-height:1.7;">
+    <div style="display:none;max-height:0;overflow:hidden;color:#eef2f7;">MornInvest 美股科技晨报，基于公开信息整理，不构成投资建议。</div>
+    <main style="max-width:760px;margin:0 auto;padding:28px 14px;">
+      <section style="background:#0f172a;border-radius:8px 8px 0 0;padding:22px 26px;color:#ffffff;">
+        <div style="font-size:13px;letter-spacing:0;text-transform:uppercase;color:#99f6e4;font-weight:800;margin-bottom:8px;">MornInvest</div>
+        <h1 style="font-size:26px;line-height:1.25;margin:0;color:#ffffff;">${escapeHtml(title)}</h1>
+        <p style="margin:10px 0 0;font-size:13px;line-height:1.6;color:#cbd5e1;">每天早上 5 分钟看懂美股科技主线</p>
+      </section>
+      <section style="background:#fff;border:1px solid #d9dee8;border-top:none;border-radius:0 0 8px 8px;padding:28px;">
         ${bodyHtml}
       </section>
-      <p style="font-size:12px;color:#6b7280;margin-top:16px;">本简报仅用于信息整理和研究参考，不构成投资建议、买卖建议或任何收益承诺。</p>
+      <p style="font-size:12px;color:#64748b;margin:16px 4px 0;line-height:1.6;">本简报仅用于信息整理和研究参考，不构成投资建议、买卖建议或任何收益承诺。你收到这封邮件是因为订阅了 MornInvest 测试版。</p>
     </main>
   </body>
 </html>`;
