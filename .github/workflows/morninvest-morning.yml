@@ -1,0 +1,46 @@
+name: MornInvest Morning Jobs
+
+on:
+  schedule:
+    - cron: "30 23 * * *"
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "generate or send"
+        required: true
+        default: "generate"
+        type: choice
+        options:
+          - generate
+          - send
+      report_date:
+        description: "Optional YYYY-MM-DD Beijing date"
+        required: false
+        type: string
+
+jobs:
+  morning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+      QWEN_REPORT_MODEL: qwen3.7-plus
+      QWEN_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      RESEND_FROM_EMAIL: MornInvest <brief@morninvest.com>
+      SEND_ALLOWLIST: ${{ secrets.SEND_ALLOWLIST }}
+      REPORT_DATE: ${{ inputs.report_date }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Generate daily report
+        if: ${{ github.event.schedule == '30 23 * * *' || inputs.task == 'generate' }}
+        run: node jobs/morning-generate.js
+      - name: Send daily report
+        if: ${{ github.event.schedule == '0 0 * * *' || inputs.task == 'send' }}
+        run: node jobs/morning-send.js

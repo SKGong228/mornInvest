@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MornInvest | 每天 5 分钟 看懂美股科技主线</title>
+    <meta
+      name="description"
+      content="MornInvest 是面向中文用户的美股科技晨报，聚焦 AI、半导体、云计算、软件和大型科技公司。"
+    />
+    <style>
+      :root {
+        --ink: #111827;
+        --muted: #5d6678;
+        --line: #d9dee8;
+        --paper: #f6f3ee;
+        --surface: #ffffff;
+        --coal: #0c111d;
+        --blue: #2754c9;
+        --green: #0f766e;
+        --amber: #b56b18;
+        --red: #b42318;
+        --shadow: 0 18px 48px rgba(12, 17, 29, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+          sans-serif;
+        line-height: 1.6;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .site-header {
+        position: absolute;
+        inset: 0 0 auto;
+        z-index: 5;
+      }
+
+      .nav {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px 0;
+        color: #ffffff;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .brand-mark {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        font-size: 15px;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 14px;
+      }
+
+      .nav-links a:hover {
+        color: #ffffff;
+      }
+
+      .hero {
+        min-height: 92svh;
+        position: relative;
+        isolation: isolate;
+        display: flex;
+        align-items: center;
+        background-image:
+          linear-gradient(90deg, rgba(7, 10, 18, 0.86) 0%, rgba(7, 10, 18, 0.70) 33%, rgba(7, 10, 18, 0.20) 67%, rgba(7, 10, 18, 0.08) 100%),
+          url("./assets/hero-morning-brief.png");
+        background-size: cover;
+        background-position: center;
+        color: #ffffff;
+      }
+
+      .hero-inner {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 112px 0 76px;
+      }
+
+      .hero-copy {
+        width: min(690px, 100%);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 18px;
+        color: #cceee9;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #2dd4bf;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 660px;
+        font-size: clamp(42px, 6vw, 76px);
+        line-height: 1.04;
+        letter-spacing: 0;
+      }
+
+      .hero-subtitle {
+        max-width: 620px;
+        margin: 22px 0 0;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 18px;
+      }
+
+      .signup {
+        width: min(620px, 100%);
+        margin: 34px 0 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+      }
+
+      .signup input {
+        min-width: 0;
+        height: 52px;
+        border: 1px solid rgba(255, 255, 255, 0.30);
+        border-radius: 8px;
+        padding: 0 16px;
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.12);
+        outline: none;
+        font-size: 15px;
+        backdrop-filter: blur(10px);
+      }
+
+      .signup input::placeholder {
+        color: rgba(255, 255, 255, 0.64);
+      }
+
+      .signup input:focus {
+        border-color: #2dd4bf;
+        box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.18);
+      }
+
+      .button {
+        min-height: 52px;
+        border: 0;
+        border-radius: 8px;
+        padding: 0 20px;
+        color: #ffffff;
+        background: var(--green);
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .button:hover {
+        background: #0b5f58;
+      }
+
+      .hero-note {
+        margin: 12px 0 0;
+        color: rgba(255, 255, 255, 0.62);
+        font-size: 13px;
+      }
+
+      .form-status {
+        min-height: 22px;
+        margin: 10px 0 0;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 13px;
+      }
+
+      .form-status.success {
+        color: #a7f3d0;
+      }
+
+      .form-status.error {
+        color: #fecaca;
+      }
+
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin-top: 24px;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 14px;
+      }
+
+      .hero-actions a {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.36);
+      }
+
+      .section {
+        padding: 72px 0;
+      }
+
+      .container {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .section-kicker {
+        margin: 0 0 10px;
+        color: var(--green);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .section-title {
+        margin: 0;
+        max-width: 760px;
+        font-size: clamp(30px, 4vw, 46px);
+        line-height: 1.12;
+        letter-spacing: 0;
+      }
+
+      .section-lede {
+        max-width: 760px;
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 17px;
+      }
+
+      .brief-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 330px;
+        gap: 28px;
+        margin-top: 34px;
+        align-items: start;
+      }
+
+      .brief {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .brief-header {
+        padding: 26px 28px;
+        border-bottom: 1px solid var(--line);
+        background: #fbfcff;
+      }
+
+      .brief-date {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .brief h2 {
+        margin: 8px 0 0;
+        font-size: 26px;
+        line-height: 1.2;
+        letter-spacing: 0;
+      }
+
+      .brief-summary {
+        margin: 12px 0 0;
+        color: var(--muted);
+      }
+
+      .brief-body {
+        padding: 8px 28px 28px;
+      }
+
+      .news-item {
+        padding: 22px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .news-item:last-child {
+        border-bottom: 0;
+      }
+
+      .news-topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .news-item h3 {
+        margin: 0;
+        font-size: 19px;
+        line-height: 1.35;
+        letter-spacing: 0;
+      }
+
+      .impact {
+        flex: 0 0 auto;
+        border-radius: 999px;
+        padding: 5px 10px;
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .impact.positive {
+        background: var(--green);
+      }
+
+      .impact.mixed {
+        background: var(--amber);
+      }
+
+      .impact.risk {
+        background: var(--red);
+      }
+
+      .source {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .news-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      .fact,
+      .why {
+        min-height: 116px;
+        border-radius: 8px;
+        padding: 14px;
+        background: #f6f8fb;
+      }
+
+      .label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .fact p,
+      .why p {
+        margin: 0;
+        color: #2f3747;
+        font-size: 14px;
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .tag {
+        border: 1px solid #cfd7e6;
+        border-radius: 999px;
+        padding: 4px 9px;
+        color: #334155;
+        background: #ffffff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .side-panel {
+        display: grid;
+        gap: 16px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .panel h3 {
+        margin: 0 0 12px;
+        font-size: 18px;
+        letter-spacing: 0;
+      }
+
+      .panel ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .panel li {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 9px 0;
+        border-bottom: 1px solid #e3e7ef;
+        color: #334155;
+        font-size: 14px;
+      }
+
+      .panel li:last-child {
+        border-bottom: 0;
+      }
+
+      .panel strong {
+        color: var(--ink);
+      }
+
+      .ticker-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .ticker-list span {
+        border-radius: 6px;
+        padding: 6px 8px;
+        background: #e9f3f2;
+        color: #0f5c55;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .proof {
+        background: #ffffff;
+      }
+
+      .proof-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin-top: 34px;
+      }
+
+      .proof-item {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 22px;
+        background: #fbfcff;
+      }
+
+      .proof-item h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        letter-spacing: 0;
+      }
+
+      .proof-item p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .coverage {
+        background: #eef4f6;
+      }
+
+      .coverage-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 30px;
+      }
+
+      .coverage-cell {
+        min-height: 132px;
+        border: 1px solid #cfdae2;
+        border-radius: 8px;
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .coverage-cell h3 {
+        margin: 0 0 8px;
+        font-size: 17px;
+        letter-spacing: 0;
+      }
+
+      .coverage-cell p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .final-cta {
+        color: #ffffff;
+        background: var(--coal);
+      }
+
+      .cta-box {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+        gap: 34px;
+        align-items: center;
+      }
+
+      .cta-box h2 {
+        margin: 0;
+        font-size: clamp(30px, 4vw, 48px);
+        line-height: 1.12;
+        letter-spacing: 0;
+      }
+
+      .cta-box p {
+        max-width: 650px;
+        margin: 14px 0 0;
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .cta-form {
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .cta-form label {
+        display: block;
+        margin-bottom: 6px;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 13px;
+      }
+
+      .cta-form input {
+        width: 100%;
+        height: 48px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 8px;
+        padding: 0 13px;
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.10);
+        font-size: 14px;
+        outline: none;
+      }
+
+      .cta-form input::placeholder {
+        color: rgba(255, 255, 255, 0.46);
+      }
+
+      .cta-form .button {
+        width: 100%;
+      }
+
+      .cta-form .form-status {
+        color: rgba(255, 255, 255, 0.62);
+      }
+
+      .cta-form .form-status.success {
+        color: #a7f3d0;
+      }
+
+      .cta-form .form-status.error {
+        color: #fecaca;
+      }
+
+      .fineprint {
+        margin: 12px 0 0;
+        color: rgba(255, 255, 255, 0.52);
+        font-size: 12px;
+      }
+
+      footer {
+        padding: 24px 0;
+        color: #6b7280;
+        background: #ffffff;
+        font-size: 13px;
+      }
+
+      .footer-line {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      @media (max-width: 900px) {
+        .nav-links {
+          display: none;
+        }
+
+        .hero {
+          min-height: 88svh;
+          background-image:
+            linear-gradient(180deg, rgba(7, 10, 18, 0.88) 0%, rgba(7, 10, 18, 0.72) 58%, rgba(7, 10, 18, 0.38) 100%),
+            url("./assets/hero-morning-brief.png");
+          background-position: 62% center;
+        }
+
+        .hero-inner {
+          padding-top: 102px;
+        }
+
+        .signup,
+        .cta-box,
+        .brief-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .signup .button {
+          width: 100%;
+        }
+
+        .proof-grid,
+        .coverage-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .nav,
+        .container,
+        .hero-inner,
+        .footer-line {
+          width: min(100% - 28px, 1180px);
+        }
+
+        h1 {
+          font-size: 40px;
+        }
+
+        .hero-subtitle {
+          font-size: 16px;
+        }
+
+        .section {
+          padding: 52px 0;
+        }
+
+        .brief-header,
+        .brief-body {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+
+        .news-topline,
+        .footer-line {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .news-grid,
+        .proof-grid,
+        .coverage-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .fact,
+        .why {
+          min-height: auto;
+        }
+
+        .hero-actions {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header" aria-label="站点导航">
+      <nav class="nav">
+        <a class="brand" href="#">
+          <span class="brand-mark">T</span>
+          <span>MornInvest</span>
+        </a>
+        <div class="nav-links">
+          <a href="./reports/index.html">样例报告</a>
+          <a href="#coverage">覆盖范围</a>
+          <a href="#subscribe">订阅</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="eyebrow">MornInvest · 美股科技晨报</p>
+            <h1>每天早上 5 分钟，看懂美股科技股主线</h1>
+            <p class="hero-subtitle">
+              聚焦 AI、半导体、云计算、软件和大型科技公司，把可信新闻转化为来源清楚、影响明确、股票相关的中文简报。
+            </p>
+            <form class="signup" action="/api/subscribe" method="post" data-subscribe-form>
+              <input type="email" name="email" placeholder="输入邮箱，订阅每日晨报" aria-label="邮箱地址" />
+              <input type="hidden" name="source" value="hero" />
+              <input type="text" name="company" autocomplete="off" tabindex="-1" aria-hidden="true" hidden />
+              <button class="button" type="submit">订阅晨报</button>
+            </form>
+            <p class="form-status" aria-live="polite"></p>
+            <p class="hero-note">每个交易日北京时间 9:00 左右发送。</p>
+            <div class="hero-actions">
+              <a href="./reports/index.html">查看完整报告案例</a>
+              <span>可选填写 watchlist：NVDA、MSFT、TSM、ASML...</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sample">
+        <div class="container">
+          <p class="section-kicker">晨报样章</p>
+          <h2 class="section-title">不是简单翻译新闻，而是把事件放进科技股语境里。</h2>
+          <p class="section-lede">
+            下方为格式样例，用来展示最终阅读体验。正式版本会替换为当日真实来源、发布时间和原文链接。
+          </p>
+
+          <div class="brief-layout">
+            <article class="brief" aria-label="样例晨报">
+              <header class="brief-header">
+                <div class="brief-date">样例 · MornInvest 美股科技晨报</div>
+                <h2>AI 芯片需求仍是主线，云资本开支和出口管制继续影响板块定价</h2>
+                <p class="brief-summary">
+                  今日关注三条线：AI 基础设施需求、半导体供应链、云厂商资本开支节奏。
+                </p>
+              </header>
+
+              <div class="brief-body">
+                <section class="news-item">
+                  <div class="news-topline">
+                    <h3>大型云厂商继续扩大 AI 基础设施投入</h3>
+                    <span class="impact positive">偏利好</span>
+                  </div>
+                  <p class="source">来源：公司公告 / 财报电话会 · 时间：美东盘后 · 原文链接</p>
+                  <div class="news-grid">
+                    <div class="fact">
+                      <span class="label">事实摘要</span>
+                      <p>管理层继续强调 AI 训练和推理需求，资本开支更多流向数据中心、GPU 集群和网络设备。</p>
+                    </div>
+                    <div class="why">
+                      <span class="label">为什么重要</span>
+                      <p>云 CAPEX 是 AI 硬件链条的核心需求信号，会影响 GPU、网络芯片、HBM、先进封装和数据中心电力主题。</p>
+                    </div>
+                  </div>
+                  <div class="tags">
+                    <span class="tag">NVDA</span>
+                    <span class="tag">AVGO</span>
+                    <span class="tag">TSM</span>
+                    <span class="tag">AI infrastructure</span>
+                    <span class="tag">Cloud CAPEX</span>
+                  </div>
+                </section>
+
+                <section class="news-item">
+                  <div class="news-topline">
+                    <h3>先进制程和 HBM 供应仍是半导体链条瓶颈</h3>
+                    <span class="impact mixed">影响分化</span>
+                  </div>
+                  <p class="source">来源：行业媒体 / 公司访谈 · 时间：美东上午 · 原文链接</p>
+                  <div class="news-grid">
+                    <div class="fact">
+                      <span class="label">事实摘要</span>
+                      <p>服务器端 AI 需求延续，但产能、交期和封装能力仍决定不同公司的兑现速度。</p>
+                    </div>
+                    <div class="why">
+                      <span class="label">为什么重要</span>
+                      <p>需求强不等于所有股票同步受益。需要区分直接供应商、设备厂、存储厂和代工厂的受益顺序。</p>
+                    </div>
+                  </div>
+                  <div class="tags">
+                    <span class="tag">MU</span>
+                    <span class="tag">ASML</span>
+                    <span class="tag">TSM</span>
+                    <span class="tag">HBM</span>
+                    <span class="tag">Advanced packaging</span>
+                  </div>
+                </section>
+
+                <section class="news-item">
+                  <div class="news-topline">
+                    <h3>监管和出口限制仍是 AI 芯片板块不确定因素</h3>
+                    <span class="impact risk">风险观察</span>
+                  </div>
+                  <p class="source">来源：监管公告 / 权威媒体 · 时间：美东盘前 · 原文链接</p>
+                  <div class="news-grid">
+                    <div class="fact">
+                      <span class="label">事实摘要</span>
+                      <p>政策讨论继续围绕高端计算芯片、数据中心能力和跨境供应链展开。</p>
+                    </div>
+                    <div class="why">
+                      <span class="label">为什么重要</span>
+                      <p>出口限制会影响收入可见度、产品组合和估值溢价，尤其需要关注管理层在财报中的措辞变化。</p>
+                    </div>
+                  </div>
+                  <div class="tags">
+                    <span class="tag">NVDA</span>
+                    <span class="tag">AMD</span>
+                    <span class="tag">Export controls</span>
+                    <span class="tag">AI regulation</span>
+                  </div>
+                </section>
+              </div>
+            </article>
+
+            <aside class="side-panel" aria-label="晨报侧栏">
+              <div class="panel">
+                <h3>今日观察清单</h3>
+                <ul>
+                  <li><span>云资本开支措辞</span><strong>高</strong></li>
+                  <li><span>HBM 供需变化</span><strong>高</strong></li>
+                  <li><span>AI 芯片出口限制</span><strong>中</strong></li>
+                  <li><span>软件 AI 收费能力</span><strong>中</strong></li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>覆盖股票示例</h3>
+                <div class="ticker-list">
+                  <span>NVDA</span>
+                  <span>MSFT</span>
+                  <span>GOOGL</span>
+                  <span>META</span>
+                  <span>AMZN</span>
+                  <span>AMD</span>
+                  <span>AVGO</span>
+                  <span>TSM</span>
+                  <span>ASML</span>
+                  <span>MU</span>
+                </div>
+              </div>
+              <div class="panel">
+                <h3>订阅后收到什么</h3>
+                <ul>
+                  <li><span>重点新闻</span><strong>5-8 条</strong></li>
+                  <li><span>来源链接</span><strong>每条</strong></li>
+                  <li><span>股票映射</span><strong>每条</strong></li>
+                  <li><span>风险提示</span><strong>固定</strong></li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="section proof">
+        <div class="container">
+          <p class="section-kicker">产品边界</p>
+          <h2 class="section-title">重点不是荐股，而是减少每天筛选英文信息的成本。</h2>
+          <div class="proof-grid">
+            <div class="proof-item">
+              <h3>来源清楚</h3>
+              <p>每条关键内容保留来源、时间和链接，重大事件优先使用公司公告、SEC 文件和权威媒体。</p>
+            </div>
+            <div class="proof-item">
+              <h3>事实-解读分离</h3>
+              <p>发生了什么，为什么重要，避免把市场判断包装成新闻事实。</p>
+            </div>
+            <div class="proof-item">
+              <h3>不做荐股</h3>
+              <p>不涉及买入、卖出、目标价或收益，只做信息整理、主题归类和风险观察。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section coverage" id="coverage">
+        <div class="container">
+          <p class="section-kicker">首版覆盖范围</p>
+          <h2 class="section-title">美股科技、AI、半导体、云和软件。</h2>
+          <p class="section-lede">
+            第一版不追求全市场。覆盖范围越克制，越容易把来源、解释和股票映射做好。
+          </p>
+          <div class="coverage-grid">
+            <div class="coverage-cell">
+              <h3>大型科技公司</h3>
+              <p>Apple、Microsoft、Alphabet、Meta、Amazon、Tesla。</p>
+            </div>
+            <div class="coverage-cell">
+              <h3>AI 与半导体</h3>
+              <p>NVIDIA、AMD、Broadcom、TSMC、ASML、Micron。</p>
+            </div>
+            <div class="coverage-cell">
+              <h3>云和软件</h3>
+              <p>云资本开支、企业软件、网络安全、AI 产品商业化。</p>
+            </div>
+            <div class="coverage-cell">
+              <h3>监管和财报</h3>
+              <p>出口管制、反垄断、业绩指引、电话会重点措辞。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section final-cta" id="subscribe">
+        <div class="container">
+          <div class="cta-box">
+            <div>
+              <p class="section-kicker">开始订阅</p>
+              <h2>先用一周判断它是否真的帮你省时间。</h2>
+              <p>
+                留下邮箱和你关注的股票。
+              </p>
+            </div>
+            <form class="cta-form" action="/api/subscribe" method="post" data-subscribe-form>
+              <label for="email">邮箱</label>
+              <input id="email" type="email" name="email" placeholder="name@example.com" />
+              <label for="watchlist">关注股票，可选</label>
+              <input id="watchlist" type="text" name="watchlist" placeholder="例如：NVDA, MSFT, TSM" />
+              <input type="hidden" name="source" value="bottom_cta" />
+              <input type="text" name="company" autocomplete="off" tabindex="-1" aria-hidden="true" hidden />
+              <button class="button" type="submit">订阅每日晨报</button>
+              <p class="form-status" aria-live="polite"></p>
+              <p class="fineprint">本简报仅用于信息整理和研究参考，不构成投资建议。</p>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-line">
+        <span>MornInvest · 中文美股科技晨报</span>
+        <span>来源可追溯 · 不做荐股 · 人工审核</span>
+      </div>
+    </footer>
+    <script>
+      const subscribeForms = document.querySelectorAll("[data-subscribe-form]");
+
+      subscribeForms.forEach((form) => {
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const status = form.nextElementSibling?.classList.contains("form-status")
+            ? form.nextElementSibling
+            : form.querySelector(".form-status");
+          const button = form.querySelector("button[type='submit']");
+          const data = Object.fromEntries(new FormData(form).entries());
+
+          if (status) {
+            status.className = "form-status";
+            status.textContent = "正在提交...";
+          }
+
+          if (button) {
+            button.disabled = true;
+            button.textContent = "提交中";
+          }
+
+          try {
+            const response = await fetch("/api/subscribe", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                ...data,
+                page: window.location.href,
+              }),
+            });
+            const result = await response.json();
+
+            if (!response.ok || !result.ok) {
+              throw new Error(result.message || "提交失败，请稍后再试。");
+            }
+
+            form.reset();
+            if (status) {
+              status.className = "form-status success";
+              status.textContent = result.message || "订阅成功。";
+            }
+          } catch (error) {
+            if (status) {
+              status.className = "form-status error";
+              status.textContent = error.message || "提交失败，请稍后再试。";
+            }
+          } finally {
+            if (button) {
+              button.disabled = false;
+              button.textContent = button.closest(".cta-form")
+                ? "订阅每日晨报"
+                : "订阅晨报";
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
