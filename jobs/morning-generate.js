@@ -30,6 +30,13 @@ function extractTitle(markdown, fallback) {
   return firstHeading ? firstHeading.slice(2).trim() : fallback;
 }
 
+function formatDatedTitle(markdown, reportDate) {
+  const baseTitle = extractTitle(markdown, "MornInvest 美股科技晨报")
+    .replace(/｜\d{4}-\d{2}-\d{2}$/, "")
+    .trim();
+  return `${baseTitle}｜${reportDate}`;
+}
+
 function getReportModelName() {
   if (process.env.QWEN_API_KEY) {
     return process.env.QWEN_REPORT_MODEL || "qwen3.7-plus";
@@ -63,7 +70,7 @@ async function main() {
 
   const [marketDashboard, newsItems] = await Promise.all([
     collectMarketDashboard(),
-    collectTechMarketSourceItems(),
+    collectTechMarketSourceItems({ reportDate }),
   ]);
   const sourceItems = [marketDashboard, ...newsItems];
   if (sourceItems.length < 5) {
@@ -84,7 +91,7 @@ async function main() {
     reportDate,
     sourceItems,
   });
-  const title = extractTitle(markdown, `MornInvest 美股科技晨报｜${reportDate}`);
+  const title = formatDatedTitle(markdown, reportDate);
   const htmlBody = wrapEmailHtml(title, markdownToBasicHtml(markdown));
 
   const report = await insertReport({

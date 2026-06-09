@@ -7,7 +7,9 @@ function escapeHtml(value) {
 }
 
 function renderInline(value) {
-  return escapeHtml(value)
+  const normalized = normalizeMarkdownLinks(value);
+
+  return escapeHtml(normalized)
     .replace(
       /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
       '<a href="$2" style="color:#0d9488;text-decoration:underline;">$1</a>'
@@ -21,7 +23,13 @@ function renderInline(value) {
 }
 
 function fieldMatch(line) {
-  return String(line || "").match(/^([^：:]{2,32}[：:])\s*(.*)$/);
+  return String(line || "").match(/^([\p{Script=Han}A-Za-z0-9 /-]{2,32}[：:])\s*(.*)$/u);
+}
+
+function normalizeMarkdownLinks(value) {
+  return String(value || "")
+    .replace(/(https?:)\s*\/\s*\//gi, "$1//")
+    .replace(/\]\((https?:\/\/[^)]*?)\)/gis, (_match, url) => `](${String(url).replace(/\s+/g, "")})`);
 }
 
 function fieldHtml(label, valueLines) {
@@ -151,7 +159,7 @@ function tableHtml(rows) {
 }
 
 function markdownToBasicHtml(markdown) {
-  const lines = String(markdown || "").replace(/\r\n/g, "\n").split("\n");
+  const lines = normalizeMarkdownLinks(markdown).replace(/\r\n/g, "\n").split("\n");
   const html = [];
   let paragraph = [];
   let listItems = [];

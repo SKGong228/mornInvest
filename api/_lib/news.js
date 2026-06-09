@@ -1,5 +1,6 @@
 const GDELT_ENDPOINT = "https://api.gdeltproject.org/api/v2/doc/doc";
 const YAHOO_RSS_ENDPOINT = "https://feeds.finance.yahoo.com/rss/2.0/headline";
+const MAX_NEWS_AGE_HOURS = 54;
 const OFFICIAL_RSS_SOURCES = [
   {
     source: "NVIDIA Newsroom",
@@ -400,6 +401,40 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function reportDateToReferenceTime(reportDate) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(reportDate || ""))) {
+    return new Date(`${reportDate}T00:30:00+08:00`);
+  }
+  return new Date();
+}
+
+function parsePublishedAt(value) {
+  const raw = String(value || "").trim();
+  if (!raw) {
+    return null;
+  }
+
+  const compactGdelt = raw.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
+  if (compactGdelt) {
+    return new Date(
+      `${compactGdelt[1]}-${compactGdelt[2]}-${compactGdelt[3]}T${compactGdelt[4]}:${compactGdelt[5]}:${compactGdelt[6]}Z`
+    );
+  }
+
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function isFreshArticle(article, referenceTime) {
+  const published = parsePublishedAt(article?.published_at || article?.seendate || article?.published);
+  if (!published) {
+    return true;
+  }
+
+  const ageHours = (referenceTime.getTime() - published.getTime()) / 36e5;
+  return ageHours <= MAX_NEWS_AGE_HOURS && ageHours >= -18;
+}
+
 async function fetchGdeltArticles(query, maxRecords = 20) {
   const url = new URL(GDELT_ENDPOINT);
   url.searchParams.set("query", query);
@@ -604,7 +639,8 @@ function normalizeArticle(article) {
   };
 }
 
-async function collectTechMarketSourceItems() {
+async function collectTechMarketSourceItems({ reportDate } = {}) {
+  const referenceTime = reportDateToReferenceTime(reportDate);
   const seen = new Set();
   const items = [];
 
@@ -618,7 +654,7 @@ async function collectTechMarketSourceItems() {
     }
 
     for (const article of batch.value) {
-      if (!article?.url || !article?.title) {
+      if (!article?.url || !article?.title || !isFreshArticle(article, referenceTime)) {
         continue;
       }
 
@@ -645,7 +681,7 @@ async function collectTechMarketSourceItems() {
     }
 
     for (const article of batch.value) {
-      if (!article?.url || !article?.title) {
+      if (!article?.url || !article?.title || !isFreshArticle(article, referenceTime)) {
         continue;
       }
 
@@ -686,7 +722,7 @@ async function collectTechMarketSourceItems() {
 
   for (const batch of gdeltBatches) {
     for (const article of batch) {
-      if (!article?.url || !article?.title) {
+      if (!article?.url || !article?.title || !isFreshArticle(article, referenceTime)) {
         continue;
       }
 

@@ -203,6 +203,96 @@ function inferMarketState(quotes) {
   return "事件驱动";
 }
 
+function parseChangePct(quote) {
+  const parsed = Number.parseFloat(String(quote?.change || "").replace("%", ""));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function formatSignedPct(value) {
+  if (!Number.isFinite(value)) {
+    return "暂无可靠输入";
+  }
+  const rounded = round(value, 2);
+  return `${rounded > 0 ? "+" : ""}${rounded}%`;
+}
+
+function buildSectorRows(quotes) {
+  const bySymbol = new Map(quotes.map((quote) => [quote.symbol, quote]));
+  const groups = [
+    {
+      sector: "大盘风险偏好",
+      symbols: ["^IXIC", "^GSPC"],
+      note: "科技成长股和大盘风险偏好",
+    },
+    {
+      sector: "半导体",
+      symbols: ["SMH", "SOXX"],
+      note: "芯片板块整体强弱",
+    },
+    {
+      sector: "AI GPU / 算力",
+      symbols: ["NVDA", "AMD"],
+      note: "AI GPU 核心与替代链条",
+    },
+    {
+      sector: "定制 AI / 数据中心网络芯片",
+      symbols: ["AVGO", "MRVL"],
+      note: "ASIC、网络芯片与数据中心互连",
+    },
+    {
+      sector: "HBM / 存储",
+      symbols: ["MU"],
+      note: "存储与 HBM 情绪",
+    },
+    {
+      sector: "光模块 / 光互连",
+      symbols: ["COHR", "LITE", "AAOI", "GLW"],
+      note: "AI 数据中心光模块、光器件与连接材料",
+    },
+    {
+      sector: "宏观风险",
+      symbols: ["^TNX", "^VIX"],
+      note: "估值压力与波动率",
+    },
+  ];
+
+  return groups
+    .map((group) => {
+      const members = group.symbols.map((symbol) => bySymbol.get(symbol)).filter(Boolean);
+      if (!members.length) {
+        return null;
+      }
+
+      if (group.sector === "宏观风险") {
+        return {
+          sector: group.sector,
+          performance: members.map((quote) => quote.performance).join(" / "),
+          representatives: members.map((quote) => quote.asset).join(" / "),
+          leaders: members.map((quote) => `${quote.asset} ${quote.performance}`).join(" / "),
+          note: group.note,
+        };
+      }
+
+      const changes = members.map(parseChangePct).filter(Number.isFinite);
+      const avg = changes.length ? changes.reduce((sum, value) => sum + value, 0) / changes.length : null;
+      const leaders = members
+        .filter((quote) => Number.isFinite(parseChangePct(quote)))
+        .sort((left, right) => parseChangePct(right) - parseChangePct(left))
+        .slice(0, 3)
+        .map((quote) => `${quote.asset} ${quote.change}`)
+        .join(" / ");
+
+      return {
+        sector: group.sector,
+        performance: formatSignedPct(avg),
+        representatives: members.map((quote) => quote.asset).join(" / "),
+        leaders: leaders || "暂无可靠输入",
+        note: group.note,
+      };
+    })
+    .filter(Boolean);
+}
+
 async function collectMarketDashboard() {
   let cnbcQuotes = new Map();
   try {
@@ -237,6 +327,7 @@ async function collectMarketDashboard() {
     summary: "Latest available daily market data for major US technology assets and risk indicators.",
     market_state: inferMarketState(quotes),
     quotes,
+    sector_rows: buildSectorRows(quotes),
   };
 }
 
