@@ -18,6 +18,10 @@ const CORE_TICKERS = [
   "AMD",
   "MU",
   "MRVL",
+  "GLW",
+  "COHR",
+  "LITE",
+  "AAOI",
   "ORCL",
   "MSFT",
   "AAPL",
@@ -51,6 +55,11 @@ const SOURCE_REGISTRY = [
       "asml.com",
       "investors.micron.com",
       "ir.tesla.com",
+      "investor.marvell.com",
+      "investor.corning.com",
+      "investors.coherent.com",
+      "investor.lumentum.com",
+      "investors.ao-inc.com",
     ],
   },
   {
@@ -154,6 +163,10 @@ const TITLE_RELEVANCE_PATTERNS = [
   /\bMeta\b/i,
   /\bTesla\b/i,
   /\bMarvell\b/i,
+  /\bCorning\b/i,
+  /\bCoherent\b/i,
+  /\bLumentum\b/i,
+  /\bApplied Optoelectronics\b/i,
   /\bOracle\b/i,
   /\bCoreWeave\b/i,
   /\bSK hynix\b/i,
@@ -163,6 +176,16 @@ const TITLE_RELEVANCE_PATTERNS = [
   /\bSOX\b/i,
   /\bSMH\b/i,
   /\bSOXX\b/i,
+  /\boptical\b/i,
+  /\boptics\b/i,
+  /\bphotonics\b/i,
+  /\bsilicon photonics\b/i,
+  /\bCPO\b/i,
+  /\btransceiver(?:s)?\b/i,
+  /\binterconnect(?:s)?\b/i,
+  /\bEthernet\b/i,
+  /\b800G\b/i,
+  /\b1\.6T\b/i,
 ];
 
 function compact(value, maxLength = 500) {
@@ -246,6 +269,10 @@ function inferTickers(text) {
     ["AVGO", ["broadcom", "avgo"]],
     ["AMD", ["advanced micro devices", " amd "]],
     ["MRVL", ["marvell", "mrvl"]],
+    ["GLW", ["corning", "glw"]],
+    ["COHR", ["coherent", "cohr"]],
+    ["LITE", ["lumentum"]],
+    ["AAOI", ["applied optoelectronics", "aaoi"]],
     ["MU", ["micron", " mu "]],
     ["TSM", ["tsmc", "taiwan semiconductor"]],
     ["ASML", ["asml"]],
@@ -269,6 +296,11 @@ function inferThemes(text) {
   const checks = [
     ["AI infrastructure", ["ai", "artificial intelligence", "data center"]],
     ["semiconductor", ["chip", "semiconductor", "gpu", "asic"]],
+    [
+      "optical interconnect",
+      ["optical", "optics", "photonics", "silicon photonics", "cpo", "transceiver", "800g", "1.6t"],
+    ],
+    ["data center networking", ["ethernet", "switching", "interconnect", "networking", "dsp", "active optical"]],
     ["cloud capex", ["cloud", "capex", "aws", "azure", "google cloud"]],
     ["earnings guidance", ["earnings", "revenue", "guidance", "forecast"]],
     ["regulation", ["regulation", "antitrust", "export control", "sec"]],
@@ -298,6 +330,13 @@ function relevanceScore(item) {
     "chip",
     "semiconductor",
     "data center",
+    "optical",
+    "photonics",
+    "transceiver",
+    "interconnect",
+    "ethernet",
+    "800g",
+    "1.6t",
     "capex",
     "regulation",
     "export control",
@@ -583,11 +622,14 @@ async function collectTechMarketSourceItems() {
   }
 
   const trustedQueries = [
-    'domain:reuters.com (NVIDIA OR Broadcom OR AMD OR Micron OR Microsoft OR Apple OR Amazon OR Google OR Meta OR Tesla) (AI OR chip OR semiconductor OR cloud OR earnings)',
-    'domain:apnews.com (NVIDIA OR Broadcom OR AMD OR Micron OR Microsoft OR Apple OR Amazon OR Google OR Meta OR Tesla OR Nasdaq) (AI OR chip OR semiconductor OR tech OR market)',
+    'domain:reuters.com (NVIDIA OR Broadcom OR AMD OR Micron OR Marvell OR Microsoft OR Apple OR Amazon OR Google OR Meta OR Tesla) (AI OR chip OR semiconductor OR cloud OR earnings)',
+    'domain:apnews.com (NVIDIA OR Broadcom OR AMD OR Micron OR Marvell OR Microsoft OR Apple OR Amazon OR Google OR Meta OR Tesla OR Nasdaq) (AI OR chip OR semiconductor OR tech OR market)',
+    'domain:reuters.com (Marvell OR MRVL OR Corning OR GLW OR Coherent OR COHR OR Lumentum OR LITE OR "Applied Optoelectronics" OR AAOI) (AI OR "data center" OR optical OR photonics OR transceiver OR networking OR ethernet OR earnings)',
+    'domain:apnews.com (Marvell OR MRVL OR Corning OR GLW OR Coherent OR COHR OR Lumentum OR LITE OR "Applied Optoelectronics" OR AAOI) (AI OR "data center" OR optical OR photonics OR transceiver OR networking OR ethernet OR earnings)',
   ];
   const discoveryQueries = [
-    '(NVIDIA OR NVDA OR Broadcom OR AVGO OR AMD OR Micron OR TSMC OR ASML) (AI OR chip OR semiconductor OR "data center")',
+    '(NVIDIA OR NVDA OR Broadcom OR AVGO OR AMD OR Micron OR Marvell OR MRVL OR TSMC OR ASML) (AI OR chip OR semiconductor OR "data center")',
+    '(Marvell OR MRVL OR Corning OR GLW OR Coherent OR COHR OR Lumentum OR LITE OR "Applied Optoelectronics" OR AAOI) ("AI data center" OR optical OR optics OR photonics OR "silicon photonics" OR CPO OR transceiver OR "800G" OR "1.6T" OR ethernet OR networking)',
   ];
   const queries = items.length >= 10 ? trustedQueries : [...trustedQueries, ...discoveryQueries];
   const gdeltBatches = [];
