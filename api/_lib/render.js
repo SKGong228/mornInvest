@@ -20,24 +20,69 @@ function renderInline(value) {
     .replace(/`([^`]+)`/g, '<code style="background:#f3f4f6;border-radius:4px;padding:1px 5px;font-family:Menlo,Consolas,monospace;font-size:13px;color:#374151;">$1</code>');
 }
 
-function renderFieldLine(line) {
-  const field = String(line || "").match(
-    /^([^：:]{2,32}[：:])\s*(.*)$/
-  );
+function fieldMatch(line) {
+  return String(line || "").match(/^([^：:]{2,32}[：:])\s*(.*)$/);
+}
 
-  if (!field) {
-    return renderInline(line);
-  }
+function fieldHtml(label, valueLines) {
+  const value = valueLines.filter(Boolean).join("\n");
+  return `<div class="mi-field" style="margin:0 0 10px;font-size:15px;line-height:1.62;color:#18212f;"><span class="mi-field-label" style="display:block;margin:0 0 3px;color:#64748b;font-size:13px;line-height:1.35;font-weight:800;">${escapeHtml(
+    label
+  )}</span>${
+    value
+      ? `<span class="mi-field-value">${renderInline(value).replace(/\n/g, "<br>")}</span>`
+      : ""
+  }</div>`;
+}
 
-  return `<span style="display:block;margin:0 0 4px;color:#64748b;font-size:13px;line-height:1.45;font-weight:800;">${escapeHtml(
-    field[1]
-  )}</span>${field[2] ? renderInline(field[2]) : ""}`;
+function plainParagraphHtml(lines) {
+  return `<p style="margin:0 0 18px;font-size:15px;line-height:1.72;color:#18212f;">${lines
+    .map(renderInline)
+    .join("<br>")}</p>`;
 }
 
 function paragraphHtml(lines) {
-  return `<p style="margin:0 0 16px;font-size:15px;line-height:1.78;color:#18212f;">${lines
-    .map(renderFieldLine)
-    .join("<br>")}</p>`;
+  const hasField = lines.some((line) => fieldMatch(line));
+
+  if (!hasField) {
+    return plainParagraphHtml(lines);
+  }
+
+  const blocks = [];
+  let paragraph = [];
+
+  function flushParagraphBlock() {
+    if (paragraph.length) {
+      blocks.push(plainParagraphHtml(paragraph));
+      paragraph = [];
+    }
+  }
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const match = fieldMatch(lines[index]);
+
+    if (!match) {
+      paragraph.push(lines[index]);
+      continue;
+    }
+
+    flushParagraphBlock();
+
+    const valueLines = [];
+    if (match[2]) {
+      valueLines.push(match[2]);
+    }
+
+    while (index + 1 < lines.length && !fieldMatch(lines[index + 1])) {
+      valueLines.push(lines[index + 1]);
+      index += 1;
+    }
+
+    blocks.push(fieldHtml(match[1], valueLines));
+  }
+
+  flushParagraphBlock();
+  return blocks.join("\n");
 }
 
 function listHtml(items, ordered) {

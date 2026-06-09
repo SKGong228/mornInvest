@@ -290,7 +290,26 @@
       }
 
       .report-body p {
-        margin: 12px 0;
+        margin: 8px 0 18px;
+        line-height: 1.72;
+      }
+
+      .report-body .mi-field {
+        margin: 0 0 14px !important;
+      }
+
+      .report-body .mi-field-label {
+        margin-bottom: 2px !important;
+        color: #64748b !important;
+        font-size: 14px !important;
+        line-height: 1.35 !important;
+      }
+
+      .report-body .mi-field-value {
+        display: block;
+        color: #18212f;
+        font-size: 16px;
+        line-height: 1.64;
       }
 
       .report-body ul,
@@ -487,7 +506,7 @@
               <button class="report-button" type="button" data-id="${item.id}">
                 <span>${formatType(item.report_type)} · ${item.report_date || ""}</span>
                 <strong>${item.title || "MornInvest 美股科技晨报"}</strong>
-                <em>${item.model || "report model"}</em>
+                <em>打开日报全文</em>
               </button>
             `
           )

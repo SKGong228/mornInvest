@@ -13,7 +13,6 @@ function toPublicReport(report) {
     report_type: report.report_type,
     report_date: report.report_date,
     created_at: report.created_at,
-    model: report.model,
     content_html: markdownToBasicHtml(report.markdown_body || ""),
     text_body:
       report.text_body || markdownToPlainText(report.markdown_body || ""),

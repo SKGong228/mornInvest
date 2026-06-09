@@ -110,13 +110,20 @@ async function listReadyReports({ reportType, limit = 20 } = {}) {
     : "";
 
   return supabaseFetch(
-    `reports?select=id,title,report_type,report_date,markdown_body,text_body,created_at,model&status=eq.ready${typeFilter}&order=report_date.desc,created_at.desc&limit=${safeLimit}`
+    `reports?select=id,title,report_type,report_date,markdown_body,text_body,created_at&status=eq.ready${typeFilter}&order=report_date.desc,created_at.desc&limit=${safeLimit}`
   );
 }
 
 async function listActiveSubscribers(limit = 1000) {
   return supabaseFetch(
     `subscribers?select=*&status=eq.active&order=created_at.asc&limit=${limit}`
+  );
+}
+
+async function listSubscribers(limit = 1000) {
+  const safeLimit = Math.min(Math.max(Number(limit) || 1000, 1), 5000);
+  return supabaseFetch(
+    `subscribers?select=id,email,watchlist,status,source,page,created_at,updated_at&order=created_at.desc&limit=${safeLimit}`
   );
 }
 
@@ -151,5 +158,6 @@ module.exports = {
   insertReport,
   listReadyReports,
   listActiveSubscribers,
+  listSubscribers,
   upsertSubscriber,
 };

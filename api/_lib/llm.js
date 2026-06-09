@@ -204,7 +204,7 @@ async function generateReportText({ reportType, reportDate, sourceItems }) {
     "相关资产：",
     "事实摘要：",
     "市场反应：",
-    "为什么重要：",
+    "意义：",
     "我的判断：",
     "后续观察：",
     "",
