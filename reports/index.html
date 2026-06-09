@@ -3,8 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MornInvest 报告样例 | 日报与周报</title>
-    <meta name="description" content="MornInvest 美股科技晨报的日报和周报样例。" />
+    <title>MornInvest 报告中心 | 美股科技晨报</title>
+    <meta
+      name="description"
+      content="MornInvest 每日美股科技晨报归档，覆盖 AI、半导体、云计算、软件和大型科技公司。"
+    />
     <style>
       :root {
         --ink: #111827;
@@ -15,461 +18,541 @@
         --coal: #0c111d;
         --green: #0f766e;
         --blue: #2754c9;
+        --red: #b42318;
         --shadow: 0 18px 48px rgba(12, 17, 29, 0.12);
       }
-      * { box-sizing: border-box; }
-      html { scroll-behavior: smooth; }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
         color: var(--ink);
         background: var(--paper);
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+          sans-serif;
         line-height: 1.72;
       }
-      a { color: inherit; }
+
+      a {
+        color: inherit;
+      }
+
       .top {
         color: #fff;
-        background: linear-gradient(120deg, #0c111d 0%, #14302d 72%, #0f766e 100%);
+        background:
+          linear-gradient(120deg, rgba(12, 17, 29, 0.96), rgba(15, 118, 110, 0.86)),
+          url("../assets/hero-morning-brief.png");
+        background-size: cover;
+        background-position: center;
       }
-      .nav, .hero, .content, footer {
-        width: min(1120px, calc(100% - 40px));
+
+      .nav,
+      .hero,
+      .content,
+      footer {
+        width: min(1180px, calc(100% - 40px));
         margin: 0 auto;
       }
+
       .nav {
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 24px 0;
       }
+
       .brand {
         display: flex;
         align-items: center;
         gap: 10px;
+        color: #fff;
         text-decoration: none;
         font-weight: 800;
       }
+
       .brand-mark {
         width: 30px;
         height: 30px;
         display: grid;
         place-items: center;
-        border: 1px solid rgba(255,255,255,.24);
+        border: 1px solid rgba(255, 255, 255, 0.24);
         border-radius: 8px;
-        background: rgba(255,255,255,.14);
+        background: rgba(255, 255, 255, 0.14);
       }
-      .nav a:not(.brand) {
-        color: rgba(255,255,255,.78);
-        text-decoration: none;
+
+      .nav-links {
+        display: flex;
+        gap: 20px;
+        color: rgba(255, 255, 255, 0.8);
         font-size: 14px;
       }
-      .hero { padding: 58px 0 64px; }
+
+      .nav-links a {
+        text-decoration: none;
+      }
+
+      .hero {
+        padding: 60px 0 70px;
+      }
+
       .eyebrow {
         margin: 0 0 12px;
         color: #a7f3d0;
         font-size: 14px;
         font-weight: 800;
       }
+
       h1 {
-        max-width: 850px;
+        max-width: 880px;
         margin: 0;
         font-size: clamp(38px, 6vw, 68px);
         line-height: 1.08;
         letter-spacing: 0;
       }
-      .hero p:last-child {
+
+      .hero-copy {
         max-width: 760px;
         margin: 20px 0 0;
-        color: rgba(255,255,255,.75);
+        color: rgba(255, 255, 255, 0.78);
         font-size: 17px;
       }
-      .content { padding: 44px 0 76px; }
-      .cards {
+
+      .content {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
-        margin-bottom: 34px;
+        grid-template-columns: 300px minmax(0, 1fr);
+        gap: 28px;
+        padding: 38px 0 78px;
+        align-items: start;
       }
-      .report-card {
-        display: block;
-        min-height: 154px;
-        padding: 18px;
+
+      .sidebar {
+        position: sticky;
+        top: 20px;
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: #fff;
-        box-shadow: 0 10px 28px rgba(12, 17, 29, 0.08);
-        text-decoration: none;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 12px 32px rgba(12, 17, 29, 0.08);
+        overflow: hidden;
       }
-      .report-card span {
-        display: inline-block;
-        margin-bottom: 10px;
+
+      .sidebar-head {
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .sidebar-head strong {
+        display: block;
+        font-size: 16px;
+      }
+
+      .sidebar-head span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .report-list {
+        display: grid;
+      }
+
+      .report-button {
+        width: 100%;
+        border: 0;
+        border-bottom: 1px solid #e5e9f0;
+        padding: 14px 18px;
+        color: var(--ink);
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .report-button:hover,
+      .report-button.active {
+        background: #edf7f5;
+      }
+
+      .report-button span {
+        display: block;
         color: var(--green);
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 900;
       }
-      .report-card strong {
+
+      .report-button strong {
         display: block;
-        color: var(--ink);
-        font-size: 16px;
+        margin-top: 5px;
+        font-size: 14px;
         line-height: 1.38;
       }
-      .report-card em {
+
+      .report-button em {
         display: block;
-        margin-top: 10px;
+        margin-top: 6px;
         color: var(--muted);
         font-size: 12px;
         font-style: normal;
       }
+
+      .report-shell {
+        min-width: 0;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .status {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .copy-button {
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0 14px;
+        color: var(--ink);
+        background: #fff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .copy-button:hover {
+        border-color: #9fb2c8;
+      }
+
       .report {
-        margin-top: 28px;
-        padding: 36px 42px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: var(--surface);
         box-shadow: var(--shadow);
+        overflow: hidden;
       }
-      .report h1 {
-        max-width: 940px;
-        color: var(--ink);
-        font-size: clamp(30px, 4vw, 44px);
+
+      .report-meta {
+        padding: 26px 32px;
+        border-top: 5px solid #14b8a6;
+        border-bottom: 1px solid var(--line);
+        background: #fbfcff;
       }
-      .report h2 {
-        margin: 38px 0 12px;
-        padding-top: 20px;
+
+      .report-meta span {
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .report-meta h2 {
+        margin: 8px 0 0;
+        font-size: clamp(28px, 4vw, 42px);
+        line-height: 1.18;
+      }
+
+      .report-meta p {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .report-body {
+        padding: 8px 32px 34px;
+      }
+
+      .report-body h1 {
+        font-size: 30px;
+      }
+
+      .report-body h2 {
+        margin: 34px 0 14px;
+        padding-top: 22px;
         border-top: 1px solid var(--line);
-        font-size: 25px;
-        line-height: 1.25;
-        letter-spacing: 0;
+        font-size: 22px;
+        line-height: 1.28;
       }
-      .report h3 {
-        margin: 28px 0 10px;
-        font-size: 20px;
+
+      .report-body h3 {
+        margin: 26px 0 12px;
+        border-left: 4px solid #14b8a6;
+        border-radius: 0 8px 8px 0;
+        padding: 11px 14px;
+        background: #f7fbfa;
+        font-size: 18px;
         line-height: 1.35;
-        letter-spacing: 0;
       }
-      .report p { margin: 10px 0; }
-      .report p:nth-child(-n+5) { color: var(--muted); }
-      .report a { color: var(--blue); text-underline-offset: 3px; }
-      .report ul, .report ol { padding-left: 22px; }
-      .report li { margin: 7px 0; }
-      .table-wrap { overflow-x: auto; margin: 16px 0; }
-      table { width: 100%; border-collapse: collapse; font-size: 14px; }
-      th, td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
-      th { background: #eef4f6; color: #233044; }
+
+      .report-body p {
+        margin: 12px 0;
+      }
+
+      .report-body ul,
+      .report-body ol {
+        padding-left: 22px;
+      }
+
+      .report-body li {
+        margin: 7px 0;
+      }
+
+      .report-body a {
+        color: var(--blue);
+        text-underline-offset: 3px;
+      }
+
+      .report-body table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      .report-body th,
+      .report-body td {
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .report-body th {
+        background: #eef4f6;
+        color: #233044;
+      }
+
+      .empty {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 28px;
+        background: #fff;
+        color: var(--muted);
+      }
+
       footer {
         padding: 26px 0;
         color: var(--muted);
         font-size: 13px;
       }
-      @media (max-width: 960px) {
-        .cards { grid-template-columns: 1fr 1fr; }
+
+      @media (max-width: 900px) {
+        .content {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          position: static;
+        }
       }
+
       @media (max-width: 640px) {
-        .nav, .hero, .content, footer { width: min(100% - 28px, 1120px); }
-        .nav { align-items: flex-start; flex-direction: column; gap: 12px; }
-        .cards { grid-template-columns: 1fr; }
-        .report { padding: 24px 18px; }
+        .nav,
+        .hero,
+        .content,
+        footer {
+          width: min(100% - 28px, 1180px);
+        }
+
+        .nav {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .toolbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .report-meta,
+        .report-body {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
       }
     </style>
   </head>
   <body>
     <header class="top">
       <nav class="nav">
-        <a class="brand" href="../index.html"><span class="brand-mark">M</span><span>MornInvest</span></a>
-        <a href="../index.html">返回首页</a>
+        <a class="brand" href="../index.html">
+          <span class="brand-mark">M</span>
+          <span>MornInvest</span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">首页</a>
+          <a href="../index.html#subscribe">订阅</a>
+        </div>
       </nav>
       <section class="hero">
-        <p class="eyebrow">日报与周报样例</p>
-        <h1>把最近三天的市场新闻，整理成可以直接阅读的中文科技股简报。</h1>
-        <p>这些样例展示 MornInvest 的内容框架：事实摘要、为什么重要、影响方向、相关股票、主题映射和后续观察点。</p>
+        <p class="eyebrow">报告中心</p>
+        <h1>每天生成的美股科技晨报，也会同步沉淀到网页端。</h1>
+        <p class="hero-copy">
+          邮件适合提醒，网页适合回看、转发和复制。这里展示已经生成的 ready 报告，内容来自同一个自动化日报数据库。
+        </p>
       </section>
     </header>
 
     <main class="content">
-      <section class="cards" aria-label="报告目录">
-        <a class="report-card" href="#daily-2026-06-03">
-      <span>日报</span>
-      <strong>油价和收益率压制风险偏好，市场等待 Broadcom 验证 AI 需求</strong>
-      <em>日期：2026-06-03</em>
-    </a><a class="report-card" href="#daily-2026-06-04">
-      <span>日报</span>
-      <strong>道指新高掩盖科技分化，AI 芯片开始接受高预期检验</strong>
-      <em>日期：2026-06-04</em>
-    </a><a class="report-card" href="#daily-2026-06-05">
-      <span>日报</span>
-      <strong>纳指急跌，AI 芯片链条从“强业绩”转向“高预期压力”</strong>
-      <em>日期：2026-06-05</em>
-    </a><a class="report-card" href="#weekly-2026-06-01-to-2026-06-05">
-      <span>周报</span>
-      <strong>AI 交易从“需求强”进入“预期验证”，纳指周五急跌暴露拥挤风险</strong>
-      <em>周期：2026-06-01 至 2026-06-05</em>
-    </a>
+      <aside class="sidebar" aria-label="报告列表">
+        <div class="sidebar-head">
+          <strong>日报归档</strong>
+          <span id="report-count">正在加载</span>
+        </div>
+        <div class="report-list" id="report-list"></div>
+      </aside>
+
+      <section class="report-shell">
+        <div class="toolbar">
+          <p class="status" id="status">正在读取最新日报...</p>
+          <button class="copy-button" id="copy-button" type="button" disabled>
+            复制纯文本
+          </button>
+        </div>
+        <article class="report" id="report" hidden>
+          <header class="report-meta">
+            <span id="report-kind">Daily Brief</span>
+            <h2 id="report-title"></h2>
+            <p id="report-date"></p>
+          </header>
+          <div class="report-body" id="report-body"></div>
+        </article>
+        <div class="empty" id="empty" hidden>
+          暂时没有可展示的 ready 报告。等自动日报生成后，这里会自动出现。
+        </div>
       </section>
-      <article class="report" id="daily-2026-06-03">
-<h1>MornInvest 美股科技晨报｜油价和收益率压制风险偏好，市场等待 Broadcom 验证 AI 需求</h1>
-<p>日期：2026-06-03 类型：日报样例 适用场景：网页样例 / 邮件样例 / 种子用户试读 说明：基于公开来源整理，不构成投资建议。</p>
-<h2>1. 今日一句话结论</h2>
-<p>6 月 3 日美股科技股承压，市场主线从单纯追逐 AI 主题，转向关注宏观压力和财报验证。油价上涨、债券收益率上行和地缘风险压低风险偏好，而盘后的 Broadcom 财报成为 AI 半导体链条的关键验证点。</p>
-<h2>2. 市场主线概览</h2>
-<ul><li><strong>宏观压力回到台前</strong>：油价和收益率上行影响成长股估值。</li><li><strong>纳指弱于大盘</strong>：高估值科技股对利率和仓位变化更敏感。</li><li><strong>AI 链条等待 Broadcom 财报</strong>：市场关注定制芯片、网络设备和云客户需求。</li><li><strong>周五就业数据前观望增加</strong>：宏观数据将影响降息预期和科技股估值。</li></ul>
-<h2>3. 重点新闻</h2>
-<h3>3.1 美股回落，纳指和科技股受到利率压力</h3>
-<p>来源：<a href="https://apnews.com/article/7eaa04d69fe8e7fbdd162d9474390dc6" target="_blank" rel="noreferrer">AP market wrap, 2026-06-03</a> 发布时间：2026-06-03 影响方向：偏利空 相关股票：QQQ、XLK、MSFT、AAPL、NVDA、META 相关主题：rates、growth stocks、market risk</p>
-<p><strong>事实摘要：</strong> 6 月 3 日美股主要指数回落，纳指跌幅较大。市场报道将压力与油价、债券收益率以及地缘风险相关联。</p>
-<p><strong>为什么重要：</strong> 科技股尤其是 AI 和软件类成长股，对利率变化更敏感。当收益率上行时，即使公司基本面没有变化，估值也可能被压缩。</p>
-<p><strong>后续观察点：</strong></p>
-<ul><li>10 年期美债收益率是否继续上行；</li><li>QQQ 是否继续弱于 SPY；</li><li>软件和 AI 高估值股票是否出现连锁回调；</li><li>周五就业数据是否改变降息预期。</li></ul>
-<h3>3.2 Broadcom 财报前，市场关注 AI 基础设施需求能否继续超预期</h3>
-<p>来源：<a href="https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial" target="_blank" rel="noreferrer">Broadcom Q2 FY2026 results</a> 发布时间：2026-06-03 盘后 影响方向：事件待验证 相关股票：AVGO、NVDA、AMD、TSM、ASML、MU 相关主题：AI infrastructure、custom silicon、networking、HBM</p>
-<p><strong>事实摘要：</strong> Broadcom 于 6 月 3 日盘后公布财报。公司是 AI 网络、定制芯片和云基础设施链条的关键公司之一。</p>
-<p><strong>为什么重要：</strong> NVIDIA 代表通用 GPU 需求，Broadcom 更能反映云厂商定制芯片和网络设备需求。若 Broadcom 的 AI 收入和指引继续强劲，说明 AI 基础设施需求不只集中在 GPU。</p>
-<p><strong>后续观察点：</strong></p>
-<ul><li>AI 半导体收入增速；</li><li>管理层对云客户订单的描述；</li><li>网络设备需求是否继续强；</li><li>财报后股价反应是否确认市场愿意继续给 AI 溢价。</li></ul>
-<h3>3.3 油价上涨增加市场不确定性，科技股受间接压制</h3>
-<p>来源：<a href="https://apnews.com/article/7eaa04d69fe8e7fbdd162d9474390dc6" target="_blank" rel="noreferrer">AP market wrap, 2026-06-03</a> 发布时间：2026-06-03 影响方向：间接利空 相关股票：QQQ、XLK、AMZN、META、MSFT 相关主题：oil、inflation、rates、macro risk</p>
-<p><strong>事实摘要：</strong> 市场报道提到油价上涨和相关地缘风险推高市场担忧。</p>
-<p><strong>为什么重要：</strong> 油价上涨会增加通胀粘性担忧，进而影响利率预期。对科技股而言，真正的影响路径不是能源成本本身，而是利率和估值折现。</p>
-<p><strong>后续观察点：</strong></p>
-<ul><li>油价是否继续上行；</li><li>通胀预期是否回升；</li><li>美债收益率是否跟随走高；</li><li>科技股是否继续对宏观风险敏感。</li></ul>
-<h2>4. 个股与主题关注清单</h2>
-<div class="table-wrap"><table><thead><tr>
-<th>优先级</th>
-<th>股票 / 主题</th>
-<th>今日判断</th>
-</tr></thead><tbody>
-<tr>
-<td>高</td>
-<td>AVGO</td>
-<td>财报将验证 AI 基础设施需求</td>
-</tr>
-<tr>
-<td>高</td>
-<td>QQQ</td>
-<td>利率压力下纳指相对弱势</td>
-</tr>
-<tr>
-<td>中</td>
-<td>NVDA</td>
-<td>关注 AI 链条情绪是否被 AVGO 带动</td>
-</tr>
-<tr>
-<td>中</td>
-<td>MSFT / AMZN / GOOGL</td>
-<td>云 CAPEX 是后续主线</td>
-</tr>
-<tr>
-<td>中</td>
-<td>Rates</td>
-<td>成长股估值核心变量</td>
-</tr>
-</tbody></table></div>
-<h2>5. 今日风险提示</h2>
-<ul><li>宏观压力可能暂时盖过 AI 基本面；</li><li>财报前后股价反应比数字本身更能反映市场预期；</li><li>如果油价和收益率继续上行，科技股估值可能继续承压。</li></ul>
-<h2>6. 免责声明</h2>
-<p>本简报仅用于信息整理和研究参考，不构成投资建议、买卖建议或任何收益承诺。市场有风险，投资决策需由用户自行判断。</p>
-</article><article class="report" id="daily-2026-06-04">
-<h1>MornInvest 美股科技晨报｜道指新高掩盖科技分化，AI 芯片开始接受高预期检验</h1>
-<p>日期：2026-06-04 类型：日报样例 适用场景：网页样例 / 邮件样例 / 种子用户试读 说明：基于公开来源整理，不构成投资建议。</p>
-<h2>1. 今日一句话结论</h2>
-<p>6 月 4 日美股表面上风险偏好改善，道指大涨并创出新高，但科技股内部已经明显分化。Broadcom 业绩公布后，AI 芯片链条没有获得一致追捧，市场开始从“AI 需求强”转向“AI 公司能否持续超预期”。</p>
-<h2>2. 市场主线概览</h2>
-<ul><li><strong>指数分化明显</strong>：道指强于纳指，说明资金并非全面追逐高估值科技股。</li><li><strong>Broadcom 成为 AI 交易温度计</strong>：公司 AI 业务数据强，但股价反应显示市场对估值和预期更敏感。</li><li><strong>油价和债券收益率缓和</strong>：宏观压力有所下降，但没有完全转化为科技股反弹。</li><li><strong>下一个风险点</strong>：6 月 5 日就业报告将影响利率预期和成长股估值。</li></ul>
-<h2>3. 重点新闻</h2>
-<h3>3.1 道指强势反弹，纳指表现明显落后</h3>
-<p>来源：<a href="https://apnews.com/article/cb4ab2243ffaf300b61f1ad6985d4456" target="_blank" rel="noreferrer">AP market wrap, 2026-06-04</a>、<a href="https://www.kiplinger.com/investing/stocks/broadcom-cant-cap-dows-874-point-bounce-stock-market-today" target="_blank" rel="noreferrer">Kiplinger market wrap, 2026-06-04</a> 发布时间：2026-06-04 影响方向：科技股中性偏谨慎 相关股票：QQQ、XLK、MSFT、AAPL、NVDA、AVGO 相关主题：market rotation、large-cap tech、AI valuation</p>
-<p><strong>事实摘要：</strong> 市场报道显示，6 月 4 日道指大幅上涨并创出新高，而纳指表现相对较弱。资金表现出一定从高估值科技向其他板块扩散的迹象。</p>
-<p><strong>为什么重要：</strong> 如果只有道指和价值板块上涨，而纳指和 AI 硬件链条跟不上，说明市场不是单纯 risk-on。中文用户需要看到的是：指数上涨不等于科技主线同步健康。</p>
-<p><strong>后续观察点：</strong></p>
-<ul><li>QQQ 是否继续弱于 DIA / SPY；</li><li>大型科技七巨头内部是否分化；</li><li>资金是否从 AI 硬件流向防御和传统蓝筹；</li><li>纳指能否在就业数据后重新转强。</li></ul>
-<h3>3.2 Broadcom 公布强劲 AI 相关数据，但市场没有直接买账</h3>
-<p>来源：<a href="https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial" target="_blank" rel="noreferrer">Broadcom Q2 FY2026 results</a>、<a href="https://www.kiplinger.com/investing/stocks/broadcom-cant-cap-dows-874-point-bounce-stock-market-today" target="_blank" rel="noreferrer">Kiplinger market wrap, 2026-06-04</a> 发布时间：2026-06-04 影响方向：影响分化 相关股票：AVGO、NVDA、AMD、TSM、ASML 相关主题：custom AI chip、AI networking、cloud CAPEX</p>
-<p><strong>事实摘要：</strong> Broadcom 财报显示 AI 半导体相关业务继续高速增长，并给出较强的未来收入指引。但市场报道显示，投资者对公司股价反应谨慎。</p>
-<p><strong>为什么重要：</strong> Broadcom 是 AI 产业链中不同于 NVIDIA 的关键角色：它更代表云厂商定制芯片、网络设备和基础设施扩张。如果 Broadcom 强数据不能带动股价，说明 AI 交易需要更强的边际惊喜。</p>
-<p><strong>后续观察点：</strong></p>
-<ul><li>云客户是否继续增加 AI 基础设施订单；</li><li>定制芯片是否被市场视为 GPU 需求的补充还是竞争；</li><li>AVGO 的估值压力是否传导到 NVDA、AMD；</li><li>网络芯片和交换机需求是否继续被上调。</li></ul>
-<h3>3.3 油价回落和收益率缓和，给市场提供短线支撑</h3>
-<p>来源：<a href="https://apnews.com/article/cb4ab2243ffaf300b61f1ad6985d4456" target="_blank" rel="noreferrer">AP market wrap, 2026-06-04</a> 发布时间：2026-06-04 影响方向：中性偏利好 相关股票：QQQ、XLK、MSFT、AMZN、META 相关主题：rates、risk appetite、growth valuation</p>
-<p><strong>事实摘要：</strong> 市场报道提到油价和债券收益率回落，帮助缓解了前一交易日宏观压力。</p>
-<p><strong>为什么重要：</strong> 成长股和科技股对利率敏感。收益率下降通常能缓解估值压力，但 6 月 4 日科技股并未全面走强，说明板块自身的高预期问题仍然存在。</p>
-<p><strong>后续观察点：</strong></p>
-<ul><li>10 年期美债收益率是否继续回落；</li><li>科技股是否能从利率缓和中获得支撑；</li><li>如果就业数据强于预期，收益率是否再度上行。</li></ul>
-<h2>4. 个股与主题关注清单</h2>
-<div class="table-wrap"><table><thead><tr>
-<th>优先级</th>
-<th>股票 / 主题</th>
-<th>今日判断</th>
-</tr></thead><tbody>
-<tr>
-<td>高</td>
-<td>AVGO</td>
-<td>AI 需求强，但股价反应是关键</td>
-</tr>
-<tr>
-<td>高</td>
-<td>QQQ</td>
-<td>指数分化下，需要看纳指能否跟上</td>
-</tr>
-<tr>
-<td>中</td>
-<td>NVDA / AMD</td>
-<td>观察 AVGO 事件是否影响 AI 芯片估值</td>
-</tr>
-<tr>
-<td>中</td>
-<td>Cloud CAPEX</td>
-<td>继续是 AI 链条需求锚</td>
-</tr>
-<tr>
-<td>中</td>
-<td>Rates</td>
-<td>就业数据前的核心变量</td>
-</tr>
-</tbody></table></div>
-<h2>5. 今日风险提示</h2>
-<ul><li>道指创新高不代表科技股风险解除；</li><li>AI 主题已经进入高预期阶段，财报好不一定股价涨；</li><li>如果就业数据推高收益率，高估值成长股可能继续承压。</li></ul>
-<h2>6. 免责声明</h2>
-<p>本简报仅用于信息整理和研究参考，不构成投资建议、买卖建议或任何收益承诺。市场有风险，投资决策需由用户自行判断。</p>
-</article><article class="report" id="daily-2026-06-05">
-<h1>MornInvest 美股科技晨报｜纳指急跌，AI 芯片链条从“强业绩”转向“高预期压力”</h1>
-<p>日期：2026-06-05 类型：日报样例 适用场景：网页样例 / 邮件样例 / 种子用户试读 说明：基于公开来源整理，不构成投资建议。</p>
-<h2>1. 今日一句话结论</h2>
-<p>6 月 5 日美股科技主线从“AI 需求仍强”切换到“高估值和高预期能否继续支撑股价”。纳指大跌，半导体和 AI 硬件链条承压，Broadcom 的强劲业绩没有带动板块，反而成为市场检验 AI 交易拥挤度的压力点。</p>
-<h2>2. 市场主线概览</h2>
-<ul><li><strong>纳指和芯片股成为下跌中心</strong>：市场并不是单纯因为宏观数据走弱，而是对 AI 硬件链条的估值和预期重新定价。</li><li><strong>Broadcom 业绩强，但市场反应弱</strong>：AI 半导体收入高速增长，但投资者更关注未来增长斜率、客户集中度和竞争风险。</li><li><strong>就业数据没有缓解科技股压力</strong>：美国 5 月非农就业增加 17.2 万，失业率 4.3%，整体就业仍有韧性，降息预期没有形成足够支撑。</li><li><strong>后续观察重点</strong>：AI 资本开支是否继续上修、芯片公司是否出现需求放缓措辞、纳指和半导体 ETF 能否止跌。</li></ul>
-<h2>3. 重点新闻</h2>
-<h3>3.1 纳指大跌，AI 和半导体板块领跌</h3>
-<p>来源：<a href="https://apnews.com/article/b5e10863b81cb1d6399f688ad8885c46" target="_blank" rel="noreferrer">AP market wrap, 2026-06-05</a>、<a href="https://www.axios.com/2026/06/05/stocks-nasdaq-tech-stocks" target="_blank" rel="noreferrer">Axios, 2026-06-05</a> 发布时间：2026-06-05 影响方向：偏利空 相关股票：NVDA、AMD、AVGO、MU、TSM、ASML、SMH、QQQ 相关主题：AI infrastructure、semiconductor、market positioning</p>
-<p><strong>事实摘要：</strong> 6 月 5 日美国股市出现明显回撤，Axios 报道纳指当日下跌 4.2%。AP 报道中提到 NVIDIA 下跌 6.2%、Broadcom 下跌 7.9%、Micron Technology 下跌 13.3%。下跌压力集中在芯片股和 AI 相关股票。</p>
-<p><strong>为什么重要：</strong> 这说明市场对 AI 链条的关注点正在变化：强需求本身已经不是充分利好，投资者开始要求更清晰的收入兑现、利润率稳定性和客户扩散。对中文用户来说，这类行情不是简单的“AI 不行了”，而是“AI 交易从主题扩张进入业绩验证阶段”。</p>
-<p><strong>后续观察点：</strong></p>
-<ul><li>SMH、SOXX、QQQ 是否连续跌破短期均线；</li><li>大型云厂商是否继续上调资本开支；</li><li>NVIDIA、Broadcom、AMD 管理层是否释放订单放缓或客户集中风险；</li><li>HBM、先进封装、网络芯片链条是否出现补跌。</li></ul>
-<h3>3.2 Broadcom 强业绩未能支撑股价，市场担心 AI 预期过高</h3>
-<p>来源：<a href="https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial" target="_blank" rel="noreferrer">Broadcom Q2 FY2026 results</a>、<a href="https://www.kiplinger.com/investing/stocks/broadcom-cant-cap-dows-874-point-bounce-stock-market-today" target="_blank" rel="noreferrer">Kiplinger market wrap, 2026-06-04</a> 发布时间：2026-06-04 至 2026-06-05 影响方向：短线偏利空，中期仍需观察 相关股票：AVGO、NVDA、AMD、TSM、ASML、MU 相关主题：AI accelerator、custom silicon、cloud CAPEX、HBM</p>
-<p><strong>事实摘要：</strong> Broadcom 公布第二财季业绩后，市场报道显示其股价承压。公司财报显示 AI 相关半导体业务仍高速增长，但市场并未把强劲数据直接解读为板块利好。</p>
-<p><strong>为什么重要：</strong> Broadcom 是 AI 硬件链条里“定制芯片 + 网络 + 云客户”的核心标的之一。它的下跌说明市场对 AI 半导体已经不只看增长，还看增长是否超过极高预期。对整个 AI 链条来说，这是估值敏感度升高的信号。</p>
-<p><strong>后续观察点：</strong></p>
-<ul><li>AI 半导体收入增速是否继续高于市场预期；</li><li>定制 ASIC 是否被视为 NVIDIA GPU 的替代或补充；</li><li>云客户资本开支是否继续支持 Broadcom 的网络和定制芯片需求；</li><li>AVGO 下跌是否外溢到 NVDA、AMD、MU。</li></ul>
-<h3>3.3 5 月非农就业保持韧性，降息交易没有明显接管市场</h3>
-<p>来源：<a href="https://www.bls.gov/news.release/archives/empsit_06052026.htm" target="_blank" rel="noreferrer">U.S. Bureau of Labor Statistics, Employment Situation, 2026-06-05</a> 发布时间：2026-06-05 影响方向：中性偏压力 相关股票：QQQ、XLK、MSFT、AAPL、AMZN、META 相关主题：rates、growth stocks、macro risk</p>
-<p><strong>事实摘要：</strong> 美国劳工统计局数据显示，2026 年 5 月非农就业增加 17.2 万，失业率为 4.3%。</p>
-<p><strong>为什么重要：</strong> 就业保持韧性意味着市场很难简单押注“经济快速走弱、利率马上下行”。对高估值科技股而言，如果利率端没有明显缓解，估值压力会更容易暴露。</p>
-<p><strong>后续观察点：</strong></p>
-<ul><li>美债收益率是否继续上行；</li><li>市场对降息时间的重新定价；</li><li>高估值软件和 AI 股票是否继续对利率敏感；</li><li>下周通胀数据和美联储表态。</li></ul>
-<h3>3.4 Tesla 相关消息与科技股主线分离，短线更多是个股事件</h3>
-<p>来源：<a href="https://apnews.com/article/b5e10863b81cb1d6399f688ad8885c46" target="_blank" rel="noreferrer">AP market wrap, 2026-06-05</a> 发布时间：2026-06-05 影响方向：个股事件，不代表科技板块整体 相关股票：TSLA 相关主题：EV、autonomous driving、single-stock risk</p>
-<p><strong>事实摘要：</strong> 市场报道提到 Tesla 当日出现明显波动，相关消息更多来自个股层面的事件和市场情绪。</p>
-<p><strong>为什么重要：</strong> Tesla 经常被纳入科技股和成长股观察范围，但其短线波动不一定代表 AI、半导体或云主线。MornInvest 在晨报中需要把 TSLA 这种高关注个股和整体科技板块主线分开处理。</p>
-<p><strong>后续观察点：</strong></p>
-<ul><li>TSLA 波动是否影响散户风险偏好；</li><li>自动驾驶和机器人叙事是否继续支撑估值；</li><li>个股新闻是否外溢到 QQQ 或大型科技情绪。</li></ul>
-<h2>4. 个股与主题关注清单</h2>
-<div class="table-wrap"><table><thead><tr>
-<th>优先级</th>
-<th>股票 / 主题</th>
-<th>今日判断</th>
-</tr></thead><tbody>
-<tr>
-<td>高</td>
-<td>AVGO</td>
-<td>强业绩后下跌，说明 AI 预期很高</td>
-</tr>
-<tr>
-<td>高</td>
-<td>NVDA</td>
-<td>关注是否受 AI 链条估值压力拖累</td>
-</tr>
-<tr>
-<td>高</td>
-<td>SMH / SOXX</td>
-<td>半导体板块是否形成连续回撤</td>
-</tr>
-<tr>
-<td>中</td>
-<td>MU / HBM</td>
-<td>若 AI 硬件链条降温，存储链条可能补跌</td>
-</tr>
-<tr>
-<td>中</td>
-<td>QQQ</td>
-<td>纳指技术面和资金风险偏好观察</td>
-</tr>
-</tbody></table></div>
-<h2>5. 今日风险提示</h2>
-<ul><li>本轮下跌不等于 AI 基本面反转，但说明市场对 AI 主题的容错率下降；</li><li>强财报后股价下跌，通常意味着预期已经提前计入；</li><li>高估值科技股仍受利率、宏观数据和仓位拥挤影响；</li><li>不应把单日下跌直接理解为买卖建议。</li></ul>
-<h2>6. 免责声明</h2>
-<p>本简报仅用于信息整理和研究参考，不构成投资建议、买卖建议或任何收益承诺。市场有风险，投资决策需由用户自行判断。</p>
-</article><article class="report" id="weekly-2026-06-01-to-2026-06-05">
-<h1>MornInvest 美股科技周报｜AI 交易从“需求强”进入“预期验证”，纳指周五急跌暴露拥挤风险</h1>
-<p>周期：2026-06-01 至 2026-06-05 类型：周报样例 适用场景：网页样例 / 邮件样例 / 种子用户试读 说明：基于公开来源整理，不构成投资建议。</p>
-<h2>1. 本周一句话结论</h2>
-<p>本周美股科技股的关键变化不是 AI 基本面突然变差，而是市场开始重新评估 AI 链条的估值、仓位和预期。Broadcom 财报显示 AI 需求仍强，但股价反应和周五纳指急跌说明：对 AI 硬件链条来说，“好消息”已经不够，必须持续超预期。</p>
-<h2>2. 本周主线</h2>
-<h3>主线一：AI 需求仍强，但股价进入高预期阶段</h3>
-<p>Broadcom 财报显示 AI 相关业务仍然高速增长，公司在定制芯片、网络和云基础设施中处于关键位置。但市场对其股价反应谨慎，并在周五进一步压低 AI 和半导体链条。</p>
-<p><strong>结论：</strong> AI 主题没有结束，但已经从“讲故事”进入“每个季度验证订单、收入和利润率”的阶段。</p>
-<h3>主线二：纳指周五大跌，芯片股成为压力中心</h3>
-<p>6 月 5 日纳指显著下跌，市场报道集中提到芯片股和 AI 相关标的承压。Broadcom、NVIDIA、AMD、Micron 等股票成为观察焦点。</p>
-<p><strong>结论：</strong> 这更像是 AI 交易拥挤后的估值压力释放，而不是单一新闻导致的基本面反转。</p>
-<h3>主线三：宏观变量重新影响成长股估值</h3>
-<p>本周油价、债券收益率和就业数据共同影响科技股风险偏好。美国 5 月非农就业增加 17.2 万，失业率 4.3%，就业仍有韧性，使市场难以简单押注快速降息。</p>
-<p><strong>结论：</strong> 如果利率端不能明显缓和，高估值科技股会继续对宏观数据敏感。</p>
-<h2>3. 本周关键事件</h2>
-<h3>3.1 Broadcom 财报：AI 基础设施需求强，但市场预期更高</h3>
-<p>来源：<a href="https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial" target="_blank" rel="noreferrer">Broadcom Q2 FY2026 results</a>、<a href="https://www.kiplinger.com/investing/stocks/broadcom-cant-cap-dows-874-point-bounce-stock-market-today" target="_blank" rel="noreferrer">Kiplinger market wrap, 2026-06-04</a> 影响方向：中期偏正面，短线偏压力 相关股票：AVGO、NVDA、AMD、TSM、ASML、MU 相关主题：AI infrastructure、custom silicon、cloud CAPEX、networking</p>
-<p><strong>周报解读：</strong> Broadcom 是本周最重要的 AI 产业链事件。它证明云端 AI 基础设施需求仍然真实，但股价反应说明投资者已经提前计入很高的增长预期。未来类似公司需要的不只是“增长”，而是“比市场想象得更快增长”。</p>
-<h3>3.2 周五纳指急跌：AI 链条从领涨主线变成风险释放点</h3>
-<p>来源：<a href="https://apnews.com/article/b5e10863b81cb1d6399f688ad8885c46" target="_blank" rel="noreferrer">AP market wrap, 2026-06-05</a>、<a href="https://www.axios.com/2026/06/05/stocks-nasdaq-tech-stocks" target="_blank" rel="noreferrer">Axios, 2026-06-05</a> 影响方向：偏利空 相关股票：QQQ、SMH、NVDA、AVGO、AMD、MU 相关主题：AI valuation、semiconductor、positioning risk</p>
-<p><strong>周报解读：</strong> 纳指下跌的意义在于，它把 AI 交易的拥挤风险暴露出来。过去市场愿意给 AI 链条很高估值，是因为需求增长和资本开支上修不断验证叙事；但一旦强业绩也无法带动股价，市场就会开始怀疑短期赔率。</p>
-<h3>3.3 道指创新高与纳指走弱并存，说明资金在做板块切换</h3>
-<p>来源：<a href="https://apnews.com/article/cb4ab2243ffaf300b61f1ad6985d4456" target="_blank" rel="noreferrer">AP market wrap, 2026-06-04</a> 影响方向：科技股中性偏谨慎 相关股票：QQQ、XLK、DIA、SPY 相关主题：market rotation、risk appetite</p>
-<p><strong>周报解读：</strong> 本周不是所有风险资产都弱。道指强势说明资金并没有全面撤出美股，而是在重新选择方向。对 MornInvest 用户来说，关键不是“美股是否崩了”，而是“科技股是否仍是资金最愿意拥抱的方向”。</p>
-<h3>3.4 就业数据保持韧性，利率压力没有完全消失</h3>
-<p>来源：<a href="https://www.bls.gov/news.release/archives/empsit_06052026.htm" target="_blank" rel="noreferrer">BLS Employment Situation, 2026-06-05</a> 影响方向：中性偏压力 相关股票：QQQ、XLK、MSFT、AAPL、AMZN、META 相关主题：rates、macro、growth valuation</p>
-<p><strong>周报解读：</strong> 5 月就业数据没有给市场一个明确的快速降息理由。对大型科技和高估值 AI 股票而言，只要利率压力存在，估值波动就会更明显。</p>
-<h2>4. 下周观察清单</h2>
-<div class="table-wrap"><table><thead><tr>
-<th>优先级</th>
-<th>观察点</th>
-<th>为什么重要</th>
-</tr></thead><tbody>
-<tr>
-<td>高</td>
-<td>纳指和半导体 ETF 是否止跌</td>
-<td>判断周五下跌是短线释放还是趋势切换</td>
-</tr>
-<tr>
-<td>高</td>
-<td>NVIDIA、Broadcom、AMD 是否继续承压</td>
-<td>判断 AI 硬件链条估值是否降温</td>
-</tr>
-<tr>
-<td>高</td>
-<td>美债收益率和降息预期</td>
-<td>科技成长股估值的外部变量</td>
-</tr>
-<tr>
-<td>中</td>
-<td>云厂商资本开支表述</td>
-<td>AI 基础设施需求的根部信号</td>
-</tr>
-<tr>
-<td>中</td>
-<td>HBM 和先进封装链条</td>
-<td>判断需求是否从 GPU 外溢到供应链</td>
-</tr>
-<tr>
-<td>中</td>
-<td>监管和出口限制消息</td>
-<td>AI 芯片收入可见度的重要风险</td>
-</tr>
-</tbody></table></div>
-<h2>5. 本周对用户最有价值的判断</h2>
-<ol><li><strong>不要把周五下跌简单理解成 AI 需求崩了。</strong> 更准确的说法是：AI 交易的估值和仓位开始接受检验。</li><li><strong>Broadcom 是观察 AI 链条扩散的重要标的。</strong> 它不只是芯片公司，也是云端定制芯片和网络基础设施的代表。</li><li><strong>指数上涨或下跌都要看结构。</strong> 道指强不等于科技股强，纳指弱也不等于全市场风险崩溃。</li><li><strong>下周重点看价格反应，而不是只看新闻标题。</strong> 如果强新闻也不能带动 AI 股票反弹，说明市场还在降低预期。</li></ol>
-<h2>6. 免责声明</h2>
-<p>本简报仅用于信息整理和研究参考，不构成投资建议、买卖建议或任何收益承诺。市场有风险，投资决策需由用户自行判断。</p>
-</article>
     </main>
 
     <footer>
-      MornInvest 报告样例仅用于信息整理和产品验证，不构成投资建议、买卖建议或收益承诺。
+      MornInvest · 中文美股科技晨报 · 本页面仅用于信息整理和研究参考，不构成投资建议。
     </footer>
+
+    <script>
+      const state = {
+        reports: [],
+        selected: null,
+      };
+
+      const list = document.querySelector("#report-list");
+      const count = document.querySelector("#report-count");
+      const status = document.querySelector("#status");
+      const empty = document.querySelector("#empty");
+      const report = document.querySelector("#report");
+      const title = document.querySelector("#report-title");
+      const date = document.querySelector("#report-date");
+      const kind = document.querySelector("#report-kind");
+      const body = document.querySelector("#report-body");
+      const copyButton = document.querySelector("#copy-button");
+
+      function formatType(type) {
+        return type === "weekly" ? "周报" : "日报";
+      }
+
+      function selectReport(reportId, replaceHistory = false) {
+        const next = state.reports.find((item) => item.id === reportId);
+        if (!next) return;
+
+        state.selected = next;
+        title.textContent = next.title || "MornInvest 美股科技晨报";
+        date.textContent = `${formatType(next.report_type)} · ${next.report_date || ""}`;
+        kind.textContent = next.report_type === "weekly" ? "Weekly Brief" : "Daily Brief";
+        body.innerHTML = next.content_html || "";
+        report.hidden = false;
+        empty.hidden = true;
+        copyButton.disabled = false;
+        status.textContent = "已加载最新报告。";
+
+        document.querySelectorAll(".report-button").forEach((button) => {
+          button.classList.toggle("active", button.dataset.id === reportId);
+        });
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("id", reportId);
+        if (replaceHistory) {
+          window.history.replaceState(null, "", url);
+        } else {
+          window.history.pushState(null, "", url);
+        }
+      }
+
+      function renderList() {
+        list.innerHTML = state.reports
+          .map(
+            (item) => `
+              <button class="report-button" type="button" data-id="${item.id}">
+                <span>${formatType(item.report_type)} · ${item.report_date || ""}</span>
+                <strong>${item.title || "MornInvest 美股科技晨报"}</strong>
+                <em>${item.model || "report model"}</em>
+              </button>
+            `
+          )
+          .join("");
+
+        list.querySelectorAll(".report-button").forEach((button) => {
+          button.addEventListener("click", () => selectReport(button.dataset.id));
+        });
+      }
+
+      async function loadReports() {
+        try {
+          const response = await fetch("/api/reports?type=daily&limit=20");
+          const result = await response.json();
+
+          if (!response.ok || !result.ok) {
+            throw new Error(result.message || "报告读取失败");
+          }
+
+          state.reports = result.reports || [];
+          count.textContent = `${state.reports.length} 份 ready 报告`;
+
+          if (!state.reports.length) {
+            status.textContent = "暂无报告。";
+            empty.hidden = false;
+            report.hidden = true;
+            return;
+          }
+
+          renderList();
+          const requestedId = new URL(window.location.href).searchParams.get("id");
+          const firstReport = state.reports.find((item) => item.id === requestedId) || state.reports[0];
+          selectReport(firstReport.id, true);
+        } catch (error) {
+          status.textContent = error.message || "报告读取失败。";
+          empty.hidden = false;
+          report.hidden = true;
+        }
+      }
+
+      copyButton.addEventListener("click", async () => {
+        if (!state.selected) return;
+
+        try {
+          await navigator.clipboard.writeText(state.selected.text_body || "");
+          copyButton.textContent = "已复制";
+          setTimeout(() => {
+            copyButton.textContent = "复制纯文本";
+          }, 1600);
+        } catch (error) {
+          copyButton.textContent = "复制失败";
+          setTimeout(() => {
+            copyButton.textContent = "复制纯文本";
+          }, 1600);
+        }
+      });
+
+      window.addEventListener("popstate", () => {
+        const requestedId = new URL(window.location.href).searchParams.get("id");
+        if (requestedId) {
+          selectReport(requestedId, true);
+        }
+      });
+
+      loadReports();
+    </script>
   </body>
 </html>

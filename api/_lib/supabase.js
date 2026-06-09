@@ -94,6 +94,26 @@ async function getReadyReportForDate(reportType, reportDate) {
   return rows[0] || null;
 }
 
+async function getReportById(reportId) {
+  const rows = await supabaseFetch(
+    `reports?select=*&id=eq.${encodeURIComponent(
+      reportId
+    )}&status=eq.ready&limit=1`
+  );
+  return rows[0] || null;
+}
+
+async function listReadyReports({ reportType, limit = 20 } = {}) {
+  const safeLimit = Math.min(Math.max(Number(limit) || 20, 1), 50);
+  const typeFilter = reportType
+    ? `&report_type=eq.${encodeURIComponent(reportType)}`
+    : "";
+
+  return supabaseFetch(
+    `reports?select=id,title,report_type,report_date,markdown_body,text_body,created_at,model&status=eq.ready${typeFilter}&order=report_date.desc,created_at.desc&limit=${safeLimit}`
+  );
+}
+
 async function listActiveSubscribers(limit = 1000) {
   return supabaseFetch(
     `subscribers?select=*&status=eq.active&order=created_at.asc&limit=${limit}`
@@ -124,10 +144,12 @@ async function insertDelivery(delivery) {
 module.exports = {
   getSupabaseConfig,
   getLatestReport,
+  getReportById,
   getReadyReportForDate,
   getSentDelivery,
   insertDelivery,
   insertReport,
+  listReadyReports,
   listActiveSubscribers,
   upsertSubscriber,
 };
