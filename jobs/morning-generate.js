@@ -1,5 +1,7 @@
 const { generateReportText } = require("../api/_lib/llm");
+const { collectAShareMapping } = require("../api/_lib/a_share_mapping");
 const { collectMarketDashboard } = require("../api/_lib/market");
+const { collectPolicyCalendar } = require("../api/_lib/macro_calendar");
 const { collectTechMarketSourceItems } = require("../api/_lib/news");
 const { collectAShareDashboard } = require("../api/_lib/tushare");
 const {
@@ -69,12 +71,20 @@ async function main() {
     return;
   }
 
-  const [marketDashboard, aShareDashboard, newsItems] = await Promise.all([
-    collectMarketDashboard(),
+  const [marketDashboard, aShareDashboard, policyCalendar, aShareMapping, newsItems] = await Promise.all([
+    collectMarketDashboard({ reportDate }),
     collectAShareDashboard({ reportDate }),
+    collectPolicyCalendar({ reportDate }),
+    collectAShareMapping(),
     collectTechMarketSourceItems({ reportDate }),
   ]);
-  const sourceItems = [marketDashboard, aShareDashboard, ...newsItems].filter(Boolean);
+  const sourceItems = [
+    marketDashboard,
+    aShareDashboard,
+    policyCalendar,
+    aShareMapping,
+    ...newsItems,
+  ].filter(Boolean);
   if (sourceItems.length < 5) {
     console.log(
       JSON.stringify({

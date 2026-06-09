@@ -1,6 +1,8 @@
 const { json, requireCronSecret } = require("../_lib/http");
 const { generateReportText } = require("../_lib/llm");
+const { collectAShareMapping } = require("../_lib/a_share_mapping");
 const { collectMarketDashboard } = require("../_lib/market");
+const { collectPolicyCalendar } = require("../_lib/macro_calendar");
 const { collectTechMarketSourceItems } = require("../_lib/news");
 const { collectAShareDashboard } = require("../_lib/tushare");
 const { getReadyReportForDate, insertReport } = require("../_lib/supabase");
@@ -65,12 +67,20 @@ module.exports = async function morningGenerate(req, res) {
       });
     }
 
-    const [marketDashboard, aShareDashboard, newsItems] = await Promise.all([
-      collectMarketDashboard(),
+    const [marketDashboard, aShareDashboard, policyCalendar, aShareMapping, newsItems] = await Promise.all([
+      collectMarketDashboard({ reportDate }),
       collectAShareDashboard({ reportDate }),
+      collectPolicyCalendar({ reportDate }),
+      collectAShareMapping(),
       collectTechMarketSourceItems({ reportDate }),
     ]);
-    const sourceItems = [marketDashboard, aShareDashboard, ...newsItems].filter(Boolean);
+    const sourceItems = [
+      marketDashboard,
+      aShareDashboard,
+      policyCalendar,
+      aShareMapping,
+      ...newsItems,
+    ].filter(Boolean);
     if (sourceItems.length < 5) {
       return json(res, 200, {
         ok: true,

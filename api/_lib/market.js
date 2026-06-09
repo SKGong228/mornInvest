@@ -12,7 +12,6 @@ const QUOTE_SYMBOLS = [
   { symbol: "LITE", label: "LITE", note: "光模块 / 光器件情绪" },
   { symbol: "AAOI", label: "AAOI", note: "数据中心光模块弹性标的" },
   { symbol: "GLW", label: "GLW", note: "光纤 / 数据中心连接材料" },
-  { symbol: "^TNX", cnbcSymbol: "US10Y", label: "10Y 美债收益率", note: "估值压力来源" },
   { symbol: "^VIX", cnbcSymbol: ".VIX", label: "VIX", note: "市场风险情绪" },
 ];
 
@@ -98,24 +97,100 @@ async function fetchCnbcQuotes(symbolConfigs) {
   }
 }
 
+function monthToken(date) {
+  const parsed = new Date(`${date || new Date().toISOString().slice(0, 10)}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) {
+    return new Date().toISOString().slice(0, 7).replace("-", "");
+  }
+  return `${parsed.getUTCFullYear()}${String(parsed.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+function previousMonthToken(token) {
+  const year = Number.parseInt(String(token).slice(0, 4), 10);
+  const month = Number.parseInt(String(token).slice(4, 6), 10);
+  const date = new Date(Date.UTC(year, month - 2, 1));
+  return `${date.getUTCFullYear()}${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+function xmlValue(entry, field) {
+  const match = String(entry || "").match(
+    new RegExp(`<d:${field}[^>]*>([^<]*)</d:${field}>`)
+  );
+  return match ? match[1] : "";
+}
+
+async function fetchTreasuryYieldMonth(month) {
+  const url = new URL(
+    "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml"
+  );
+  url.searchParams.set("data", "daily_treasury_yield_curve");
+  url.searchParams.set("field_tdr_date_value_month", month);
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        Accept: "application/xml,text/xml",
+        "User-Agent": "MornInvest/0.1",
+      },
+    });
+    const text = await response.text();
+    if (!response.ok) {
+      throw new Error(`Treasury XML returned ${response.status}: ${text.slice(0, 200)}`);
+    }
+
+    return Array.from(text.matchAll(/<entry>[\s\S]*?<\/entry>/g))
+      .map((match) => ({
+        date: xmlValue(match[0], "NEW_DATE").slice(0, 10),
+        twoYear: Number.parseFloat(xmlValue(match[0], "BC_2YEAR")),
+        tenYear: Number.parseFloat(xmlValue(match[0], "BC_10YEAR")),
+      }))
+      .filter((row) => row.date && Number.isFinite(row.tenYear))
+      .sort((left, right) => left.date.localeCompare(right.date));
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchTreasuryYieldQuote(reportDate) {
+  const currentMonth = monthToken(reportDate);
+  const rows = [
+    ...(await fetchTreasuryYieldMonth(previousMonthToken(currentMonth))),
+    ...(await fetchTreasuryYieldMonth(currentMonth)),
+  ].sort((left, right) => left.date.localeCompare(right.date));
+
+  if (rows.length < 2) {
+    return null;
+  }
+
+  const latest = rows[rows.length - 1];
+  const previous = rows[rows.length - 2];
+  const bpChange = round((latest.tenYear - previous.tenYear) * 100, 1);
+
+  return {
+    asset: "10Y 美债收益率",
+    symbol: "^TNX",
+    latest: `${round(latest.tenYear, 2)}%`,
+    change: `${bpChange > 0 ? "+" : ""}${bpChange} bp`,
+    performance: `${round(latest.tenYear, 2)}% / ${bpChange > 0 ? "+" : ""}${bpChange} bp`,
+    note: `估值压力来源，Treasury 官方日度收益率，最新日期 ${latest.date}`,
+    source: "U.S. Treasury Daily Treasury Rates XML Feed",
+    source_url:
+      "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?data=yield",
+    two_year: Number.isFinite(latest.twoYear) ? `${round(latest.twoYear, 2)}%` : null,
+    trade_date: latest.date,
+  };
+}
+
 function formatCnbcQuote(symbolConfig, quote) {
   const latest = Number.parseFloat(quote?.last);
   const previous = Number.parseFloat(quote?.previous_day_closing);
   const changePct = Number.parseFloat(quote?.change_pct);
   if (!Number.isFinite(latest)) {
     return null;
-  }
-
-  if (symbolConfig.symbol === "^TNX") {
-    const bpChange = Number.isFinite(previous) ? round((latest - previous) * 100, 1) : null;
-    return {
-      asset: symbolConfig.label,
-      symbol: symbolConfig.symbol,
-      latest: `${round(latest, 2)}%`,
-      change: bpChange === null ? "暂无可靠输入" : `${bpChange} bp`,
-      performance: bpChange === null ? `${round(latest, 2)}%` : `${round(latest, 2)}% / ${bpChange} bp`,
-      note: symbolConfig.note,
-    };
   }
 
   if (symbolConfig.symbol === "^VIX") {
@@ -149,17 +224,6 @@ function formatQuote(symbolConfig, chart) {
   const previous = valid[valid.length - 2];
   const latest = valid[valid.length - 1];
   const changePct = ((latest - previous) / previous) * 100;
-
-  if (symbolConfig.symbol === "^TNX") {
-    return {
-      asset: symbolConfig.label,
-      symbol: symbolConfig.symbol,
-      latest: `${round(latest / 10, 2)}%`,
-      change: `${round((latest - previous) * 10, 1)} bp`,
-      performance: `${round(latest / 10, 2)}% / ${round((latest - previous) * 10, 1)} bp`,
-      note: symbolConfig.note,
-    };
-  }
 
   if (symbolConfig.symbol === "^VIX") {
     return {
@@ -293,7 +357,7 @@ function buildSectorRows(quotes) {
     .filter(Boolean);
 }
 
-async function collectMarketDashboard() {
+async function collectMarketDashboard({ reportDate } = {}) {
   let cnbcQuotes = new Map();
   try {
     cnbcQuotes = await fetchCnbcQuotes(QUOTE_SYMBOLS);
@@ -302,15 +366,18 @@ async function collectMarketDashboard() {
   }
 
   const settled = await Promise.allSettled(
-    QUOTE_SYMBOLS.map(async (symbolConfig) => {
-      const cnbcQuote = cnbcQuotes.get(symbolConfig.symbol);
-      if (cnbcQuote) {
-        return formatCnbcQuote(symbolConfig, cnbcQuote);
-      }
+    [
+      ...QUOTE_SYMBOLS.map(async (symbolConfig) => {
+        const cnbcQuote = cnbcQuotes.get(symbolConfig.symbol);
+        if (cnbcQuote) {
+          return formatCnbcQuote(symbolConfig, cnbcQuote);
+        }
 
-      const chart = await fetchChart(symbolConfig.symbol);
-      return formatQuote(symbolConfig, chart);
-    })
+        const chart = await fetchChart(symbolConfig.symbol);
+        return formatQuote(symbolConfig, chart);
+      }),
+      fetchTreasuryYieldQuote(reportDate),
+    ]
   );
 
   const quotes = settled
@@ -319,7 +386,7 @@ async function collectMarketDashboard() {
     .filter(Boolean);
 
   return {
-    source: "CNBC quote API / Yahoo Finance chart API",
+    source: "U.S. Treasury Daily Rates / CNBC quote API / Yahoo Finance chart API",
     title: "Market dashboard for US technology morning brief",
     url: "https://finance.yahoo.com/",
     published_at: new Date().toISOString(),
