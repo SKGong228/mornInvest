@@ -42,7 +42,7 @@ module.exports = async function reports(req, res) {
     );
     const id = requestUrl.searchParams.get("id");
     const reportType = requestUrl.searchParams.get("type") || "daily";
-    const limit = requestUrl.searchParams.get("limit") || 20;
+    const limit = id ? requestUrl.searchParams.get("limit") || 1 : 1;
 
     res.setHeader("Cache-Control", "public, max-age=60");
 

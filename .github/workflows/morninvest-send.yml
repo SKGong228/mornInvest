@@ -34,6 +34,7 @@ jobs:
       QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
       QWEN_REPORT_MODEL: qwen3.7-plus
       QWEN_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+      TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       RESEND_FROM_EMAIL: MornInvest <brief@morninvest.com>
       SEND_ALLOWLIST: ${{ github.event_name == 'workflow_dispatch' && inputs.send_allowlist || '' }}

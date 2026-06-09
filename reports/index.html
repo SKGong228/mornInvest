@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MornInvest 报告中心 | 美股科技晨报</title>
+    <title>MornInvest 最新日报 | 美股科技晨报</title>
     <meta
       name="description"
       content="MornInvest 每日美股科技晨报归档，覆盖 AI、半导体、云计算、软件和大型科技公司。"
@@ -409,18 +409,18 @@
         </div>
       </nav>
       <section class="hero">
-        <p class="eyebrow">报告中心</p>
+        <p class="eyebrow">最新日报</p>
         <h1>每天生成的美股科技晨报，也会同步沉淀到网页端。</h1>
         <p class="hero-copy">
-          邮件适合提醒，网页适合回看、转发和复制。这里展示已经生成的 ready 报告，内容来自同一个自动化日报数据库。
+          邮件适合提醒，网页适合阅读、转发和复制。这里默认只展示最新一版 ready 日报，内容来自同一个自动化日报数据库。
         </p>
       </section>
     </header>
 
     <main class="content">
-      <aside class="sidebar" aria-label="报告列表">
+      <aside class="sidebar" aria-label="最新日报">
         <div class="sidebar-head">
-          <strong>日报归档</strong>
+          <strong>最新日报</strong>
           <span id="report-count">正在加载</span>
         </div>
         <div class="report-list" id="report-list"></div>
@@ -519,7 +519,7 @@
 
       async function loadReports() {
         try {
-          const response = await fetch("/api/reports?type=daily&limit=20");
+          const response = await fetch("/api/reports?type=daily&limit=1");
           const result = await response.json();
 
           if (!response.ok || !result.ok) {
@@ -527,7 +527,7 @@
           }
 
           state.reports = result.reports || [];
-          count.textContent = `${state.reports.length} 份 ready 报告`;
+          count.textContent = state.reports.length ? "当前最新版" : "暂无 ready 日报";
 
           if (!state.reports.length) {
             status.textContent = "暂无报告。";
