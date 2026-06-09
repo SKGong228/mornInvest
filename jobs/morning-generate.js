@@ -45,9 +45,10 @@ function getReportModelName() {
 async function main() {
   const reportType = "daily";
   const reportDate = process.env.REPORT_DATE || getBeijingDate();
+  const forceRegenerate = /^(1|true|yes)$/i.test(process.env.FORCE_REGENERATE || "");
 
   const existing = await getReadyReportForDate(reportType, reportDate);
-  if (existing) {
+  if (existing && !forceRegenerate) {
     console.log(
       JSON.stringify({
         ok: true,

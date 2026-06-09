@@ -9,6 +9,11 @@ on:
         description: "Optional YYYY-MM-DD Beijing date"
         required: false
         type: string
+      force_regenerate:
+        description: "Create a fresh report even if one already exists"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   generate:
@@ -21,6 +26,7 @@ jobs:
       QWEN_REPORT_MODEL: qwen3.7-plus
       QWEN_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
       REPORT_DATE: ${{ inputs.report_date }}
+      FORCE_REGENERATE: ${{ inputs.force_regenerate || 'false' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -9,6 +9,20 @@ on:
         description: "Optional YYYY-MM-DD Beijing date"
         required: false
         type: string
+      force_regenerate:
+        description: "Create a fresh report before sending"
+        required: false
+        default: false
+        type: boolean
+      send_allowlist:
+        description: "Optional comma-separated test recipients"
+        required: false
+        type: string
+      force_send:
+        description: "Send even if this report was already delivered"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   send:
@@ -22,8 +36,10 @@ jobs:
       QWEN_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       RESEND_FROM_EMAIL: MornInvest <brief@morninvest.com>
-      SEND_ALLOWLIST: ${{ secrets.SEND_ALLOWLIST }}
+      SEND_ALLOWLIST: ${{ inputs.send_allowlist || secrets.SEND_ALLOWLIST }}
       REPORT_DATE: ${{ inputs.report_date }}
+      FORCE_REGENERATE: ${{ inputs.force_regenerate || 'false' }}
+      FORCE_SEND: ${{ inputs.force_send || 'false' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

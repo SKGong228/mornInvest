@@ -21,6 +21,7 @@ function getBeijingDate() {
 async function main() {
   const reportType = "daily";
   const reportDate = process.env.REPORT_DATE || getBeijingDate();
+  const forceSend = /^(1|true|yes)$/i.test(process.env.FORCE_SEND || "");
   const allowlist = String(process.env.SEND_ALLOWLIST || "")
     .split(",")
     .map((email) => email.trim().toLowerCase())
@@ -53,7 +54,7 @@ async function main() {
       email: subscriber.email,
     });
 
-    if (existing) {
+    if (existing && !forceSend) {
       results.push({ email: subscriber.email, status: "already_sent" });
       continue;
     }
