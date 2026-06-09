@@ -1,0 +1,30 @@
+name: MornInvest Generate Daily Report
+
+on:
+  schedule:
+    - cron: "35 23 * * *"
+  workflow_dispatch:
+    inputs:
+      report_date:
+        description: "Optional YYYY-MM-DD Beijing date"
+        required: false
+        type: string
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+      QWEN_REPORT_MODEL: qwen3.7-plus
+      QWEN_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+      REPORT_DATE: ${{ inputs.report_date }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Generate daily report
+        run: node jobs/morning-generate.js
