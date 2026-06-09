@@ -36,7 +36,7 @@ jobs:
       QWEN_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       RESEND_FROM_EMAIL: MornInvest <brief@morninvest.com>
-      SEND_ALLOWLIST: ${{ inputs.send_allowlist || secrets.SEND_ALLOWLIST }}
+      SEND_ALLOWLIST: ${{ github.event_name == 'workflow_dispatch' && inputs.send_allowlist || '' }}
       REPORT_DATE: ${{ inputs.report_date }}
       FORCE_REGENERATE: ${{ inputs.force_regenerate || 'false' }}
       FORCE_SEND: ${{ inputs.force_send || 'false' }}
