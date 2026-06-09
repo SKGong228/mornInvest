@@ -1,10 +1,10 @@
-const TUSHARE_INDEX_SYMBOLS = [
-  { ts_code: "000001.SH", name: "上证指数", note: "A 股大盘风险偏好" },
-  { ts_code: "399001.SZ", name: "深证成指", note: "成长与制造链风险偏好" },
-  { ts_code: "399006.SZ", name: "创业板指", note: "成长股和科技链情绪" },
-  { ts_code: "000688.SH", name: "科创50", note: "硬科技与半导体情绪" },
-  { ts_code: "000300.SH", name: "沪深300", note: "核心资产风险偏好" },
-  { ts_code: "000905.SH", name: "中证500", note: "中盘成长与制造链情绪" },
+const A_SHARE_TECH_FUNDS = [
+  { ts_code: "159915.SZ", name: "创业板 ETF", note: "A 股成长股风险偏好" },
+  { ts_code: "588000.SH", name: "科创50 ETF", note: "硬科技与半导体情绪" },
+  { ts_code: "512480.SH", name: "半导体 ETF", note: "A 股半导体链条情绪" },
+  { ts_code: "159995.SZ", name: "芯片 ETF", note: "国产芯片与设计链条情绪" },
+  { ts_code: "515050.SH", name: "5G 通信 ETF", note: "通信、光模块与高速连接情绪" },
+  { ts_code: "516510.SH", name: "云计算 ETF", note: "云计算与软件链条情绪" },
 ];
 
 function formatDateForTushare(date) {
@@ -43,7 +43,7 @@ async function tushareRequest(apiName, params, fields) {
   const timeout = setTimeout(() => controller.abort(), 15000);
 
   try {
-    const response = await fetch(process.env.TUSHARE_BASE_URL || "http://api.tushare.pro", {
+    const response = await fetch(process.env.TUSHARE_BASE_URL || "https://api.tushare.pro", {
       method: "POST",
       signal: controller.signal,
       headers: {
@@ -75,22 +75,32 @@ async function tushareRequest(apiName, params, fields) {
   }
 }
 
-async function fetchLatestIndexRow(config, reportDate) {
+async function fetchFundRows(reportDate) {
   const endDate = formatDateForTushare(reportDate);
   const startDate = formatYmd(dateDaysBefore(reportDate, 14));
-  const rows = await tushareRequest(
-    "index_daily",
+  return tushareRequest(
+    "fund_daily",
     {
-      ts_code: config.ts_code,
       start_date: startDate,
       end_date: endDate,
     },
     "ts_code,trade_date,close,pct_chg,amount"
   );
+}
 
-  return rows
-    .filter((row) => row && row.ts_code === config.ts_code)
-    .sort((left, right) => String(right.trade_date).localeCompare(String(left.trade_date)))[0] || null;
+function latestRowsByCode(rows) {
+  const byCode = new Map();
+  for (const row of rows || []) {
+    const code = row?.ts_code;
+    if (!code) {
+      continue;
+    }
+    const existing = byCode.get(code);
+    if (!existing || String(row.trade_date).localeCompare(String(existing.trade_date)) > 0) {
+      byCode.set(code, row);
+    }
+  }
+  return byCode;
 }
 
 function signedPct(value) {
@@ -107,39 +117,37 @@ async function collectAShareDashboard({ reportDate } = {}) {
   }
 
   try {
-    const rows = await Promise.all(
-      TUSHARE_INDEX_SYMBOLS.map(async (config) => {
-        const row = await fetchLatestIndexRow(config, reportDate);
-        if (!row) {
-          return null;
-        }
-        return {
-          name: config.name,
-          ts_code: config.ts_code,
-          trade_date: row.trade_date,
-          close: row.close,
-          pct_chg: Number.parseFloat(row.pct_chg),
-          performance: signedPct(row.pct_chg),
-          note: config.note,
-        };
-      })
-    );
+    const rowsByCode = latestRowsByCode(await fetchFundRows(reportDate));
+    const funds = A_SHARE_TECH_FUNDS.map((config) => {
+      const row = rowsByCode.get(config.ts_code);
+      if (!row) {
+        return null;
+      }
+      return {
+        name: config.name,
+        ts_code: config.ts_code,
+        trade_date: row.trade_date,
+        close: row.close,
+        pct_chg: Number.parseFloat(row.pct_chg),
+        performance: signedPct(row.pct_chg),
+        note: config.note,
+      };
+    }).filter(Boolean);
 
-    const indexes = rows.filter(Boolean);
-    if (!indexes.length) {
+    if (!funds.length) {
       return null;
     }
 
     return {
       source: "Tushare Pro",
       source_rank: 2,
-      title: "A-share index dashboard for MornInvest",
+      title: "A-share technology fund dashboard for MornInvest",
       url: "https://tushare.pro/",
       published_at: new Date().toISOString(),
       type: "a_share_dashboard",
       summary:
-        "A股主要指数最新可用日线表现，用于日报中的A股科技链条方向参考，不构成A股个股建议。",
-      indexes,
+        "A股科技主题 ETF 最新可用日线表现，用于日报中的A股科技链条方向参考，不构成A股个股建议。",
+      funds,
     };
   } catch (error) {
     console.warn(`Tushare dashboard skipped: ${error.message || error}`);
