@@ -77,6 +77,23 @@ def report_by_id(report_id):
     return rows[0]
 
 
+def report_by_date(report_date):
+    params = urllib.parse.urlencode(
+        {
+            "select": "id,title,report_type,report_date,markdown_body,created_at",
+            "report_type": "eq.daily",
+            "report_date": f"eq.{report_date}",
+            "status": "eq.ready",
+            "order": "created_at.desc",
+            "limit": "1",
+        }
+    )
+    rows = supabase_get(f"reports?{params}")
+    if not rows:
+        raise RuntimeError(f"Report not found for date: {report_date}")
+    return rows[0]
+
+
 def set_cell_shading(cell, fill):
     tc_pr = cell._tc.get_or_add_tcPr()
     shading = OxmlElement("w:shd")
@@ -366,10 +383,16 @@ def build_docx(report, output_dir):
 def main():
     parser = argparse.ArgumentParser(description="Export the latest MornInvest report as a DOCX file.")
     parser.add_argument("--report-id", default=os.environ.get("REPORT_ID"), help="Optional Supabase report id")
+    parser.add_argument("--report-date", default=os.environ.get("REPORT_DATE"), help="Optional YYYY-MM-DD report date")
     parser.add_argument("--out-dir", default="report-output", help="Output directory")
     args = parser.parse_args()
 
-    report = report_by_id(args.report_id) if args.report_id else latest_report()
+    if args.report_id:
+        report = report_by_id(args.report_id)
+    elif args.report_date:
+        report = report_by_date(args.report_date)
+    else:
+        report = latest_report()
     output_path = build_docx(report, Path(args.out_dir))
     print(json.dumps({"report_id": report["id"], "report_date": report.get("report_date"), "path": str(output_path)}, ensure_ascii=False, indent=2))
 

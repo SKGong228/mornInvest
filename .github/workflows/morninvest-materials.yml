@@ -1,0 +1,106 @@
+name: MornInvest Publish Materials
+
+on:
+  schedule:
+    - cron: "20 0 * * *"
+  workflow_dispatch:
+    inputs:
+      report_date:
+        description: "Optional YYYY-MM-DD Beijing date"
+        required: false
+        type: string
+      recipients:
+        description: "Optional comma-separated material recipients"
+        required: false
+        type: string
+
+jobs:
+  materials:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+      QWEN_REPORT_MODEL: qwen3.7-plus
+      QWEN_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+      TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      RESEND_FROM_EMAIL: MornInvest <brief@morninvest.com>
+      REPORT_DATE: ${{ inputs.report_date }}
+      MATERIALS_RECIPIENTS: ${{ inputs.recipients || secrets.MATERIALS_RECIPIENTS || 'gongshk@outlook.com' }}
+      FORCE_REGENERATE: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install material dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install python-docx
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Resolve Beijing report date
+        id: date
+        run: |
+          if [ -n "${REPORT_DATE}" ]; then
+            echo "report_date=${REPORT_DATE}" >> "$GITHUB_OUTPUT"
+          else
+            echo "report_date=$(TZ=Asia/Shanghai date +%F)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ensure daily report exists
+        env:
+          REPORT_DATE: ${{ steps.date.outputs.report_date }}
+        run: node jobs/morning-generate.js
+
+      - name: Generate Xiaohongshu images
+        env:
+          REPORT_DATE: ${{ steps.date.outputs.report_date }}
+          SOCIAL_OUTPUT_DIR: social-output
+        run: node scripts/social_cards_html.js
+
+      - name: Generate Xueqiu Word document
+        env:
+          REPORT_DATE: ${{ steps.date.outputs.report_date }}
+        run: python scripts/export_report_docx.py --out-dir report-output
+
+      - name: Generate social copy
+        env:
+          REPORT_DATE: ${{ steps.date.outputs.report_date }}
+        run: node scripts/export_social_copy.js
+
+      - name: Package materials
+        id: package
+        env:
+          REPORT_DATE: ${{ steps.date.outputs.report_date }}
+        run: |
+          mkdir -p report-output
+          ZIP_PATH="report-output/morninvest-${REPORT_DATE}-materials.zip"
+          zip -j "$ZIP_PATH" report-output/*.docx report-output/*.txt social-output/*.png
+          echo "zip_path=$ZIP_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Upload materials artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: morninvest-${{ steps.date.outputs.report_date }}-materials
+          path: |
+            report-output/*.zip
+            report-output/*.docx
+            report-output/*.txt
+            social-output/*.png
+          retention-days: 14
+
+      - name: Email materials package
+        env:
+          REPORT_DATE: ${{ steps.date.outputs.report_date }}
+          MATERIALS_ZIP: ${{ steps.package.outputs.zip_path }}
+        run: node jobs/send-materials.js

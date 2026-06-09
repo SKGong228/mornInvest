@@ -1,4 +1,4 @@
-async function sendEmail({ to, subject, html, text }) {
+async function sendEmail({ to, subject, html, text, attachments }) {
   if (!process.env.RESEND_API_KEY) {
     throw new Error("RESEND_API_KEY is not configured.");
   }
@@ -17,6 +17,7 @@ async function sendEmail({ to, subject, html, text }) {
       subject,
       html,
       text,
+      ...(attachments?.length ? { attachments } : {}),
     }),
   });
 
@@ -33,4 +34,3 @@ async function sendEmail({ to, subject, html, text }) {
 module.exports = {
   sendEmail,
 };
-

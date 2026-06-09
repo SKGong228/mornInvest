@@ -1,10 +1,12 @@
 const fs = require("node:fs/promises");
+const { existsSync } = require("node:fs");
 const path = require("node:path");
 
 const WIDTH = 1080;
 const HEIGHT = 1440;
-const OUT_DIR = "social-output";
-const CHROME_PATH = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const OUT_DIR = process.env.SOCIAL_OUTPUT_DIR || "social-output";
+const CHROME_PATH =
+  process.env.CHROME_PATH || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 function requireEnv(name) {
   const value = process.env[name];
@@ -32,6 +34,7 @@ async function supabaseGet(query) {
 }
 
 async function latestDailyReport() {
+  const reportDate = process.env.REPORT_DATE;
   const params = new URLSearchParams({
     select: "id,title,report_date,markdown_body,created_at",
     report_type: "eq.daily",
@@ -39,6 +42,10 @@ async function latestDailyReport() {
     order: "report_date.desc,created_at.desc",
     limit: "20",
   });
+  if (reportDate) {
+    params.set("report_date", `eq.${reportDate}`);
+    params.set("limit", "1");
+  }
   const rows = await supabaseGet(`reports?${params.toString()}`);
   const report = rows.find((row) => /^\d{4}-\d{2}-\d{2}$/.test(row.report_date || ""));
   if (!report) {
@@ -372,10 +379,11 @@ async function main() {
   ];
 
   await fs.mkdir(OUT_DIR, { recursive: true });
-  const browser = await chromium.launch({
-    headless: true,
-    executablePath: CHROME_PATH,
-  });
+  const launchOptions = { headless: true };
+  if (CHROME_PATH && existsSync(CHROME_PATH)) {
+    launchOptions.executablePath = CHROME_PATH;
+  }
+  const browser = await chromium.launch(launchOptions);
   const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1 });
   const paths = [];
   for (let index = 0; index < cards.length; index += 1) {
