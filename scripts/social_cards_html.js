@@ -130,8 +130,9 @@ function parseNews(markdown) {
     .map((chunk) => ({
       title: clean(chunk.split("\n")[0]),
       assets: fieldValue(chunk, "相关资产"),
-      facts: fieldValue(chunk, "事实摘要"),
+      facts: fieldValue(chunk, "事件摘要") || fieldValue(chunk, "事实摘要"),
       why: fieldValue(chunk, "意义") || fieldValue(chunk, "为什么重要"),
+      aShare: fieldValue(chunk, "A股产业链指引") || fieldValue(chunk, "后续观察"),
     }))
     .slice(0, 4);
 }
@@ -235,14 +236,15 @@ function shell({ page, date, kicker, body }) {
         .signal { height:303px; margin-bottom:20px; }
         .signal-title { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
         .signal-title .tag { flex:0 0 auto; margin-top:0; }
-        .news { height:420px; margin-bottom:20px; }
+        .news { height:500px; margin-bottom:22px; }
         .news h2 { font-size:30px !important; line-height:1.22; margin-bottom:12px; }
         .news .field { margin-top:10px; }
         .news .field span { font-size:20px; }
         .news .field p { font-size:23px; line-height:1.45; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
         .news .assets p { -webkit-line-clamp:1; color:#0f766e; }
-        .news .facts p { -webkit-line-clamp:3; }
+        .news .facts p { -webkit-line-clamp:2; }
         .news .why p { -webkit-line-clamp:1; }
+        .news .a-share p { -webkit-line-clamp:1; color:#0f766e; }
         .cta { position:absolute; left:34px; right:34px; bottom:112px; border-radius:24px; background:#0f766e; color:white; padding:28px 32px; }
         .cta span { display:block; color:#d1fae5; font-size:21px; }
         .cta strong { display:block; margin-top:8px; font-size:46px; line-height:1.1; font-weight:500; }
@@ -333,8 +335,9 @@ function cardNews(data, newsItems, page, kicker = "3. 重点新闻拆解") {
         <div class="panel news">
           <h2>${html(item.title)}</h2>
           ${field("相关资产", item.assets, "assets")}
-          ${field("事实摘要", item.facts, "facts")}
+          ${field("事件摘要", item.facts, "facts")}
           ${field("意义", item.why, "why")}
+          ${field("A股产业链指引", item.aShare, "a-share")}
         </div>`
       )
       .join(""),

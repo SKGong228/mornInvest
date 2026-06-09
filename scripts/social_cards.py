@@ -180,9 +180,9 @@ def parse_news(markdown):
             {
                 "title": title,
                 "assets": field_value(chunk, "相关资产"),
-                "facts": field_value(chunk, "事实摘要"),
+                "facts": field_value(chunk, "事件摘要") or field_value(chunk, "事实摘要"),
                 "why": field_value(chunk, "意义") or field_value(chunk, "为什么重要"),
-                "judgement": field_value(chunk, "我的判断"),
+                "a_share": field_value(chunk, "A股产业链指引") or field_value(chunk, "后续观察"),
             }
         )
     return news[:4]
@@ -366,18 +366,21 @@ def card_news(data):
     img, draw = base_card(5, data["date"], "3. 重点新闻拆解")
     y = 210
     for item in data["news"][:2]:
-        rounded(draw, (86, y, WIDTH - 86, y + 430), "#fbfcff", "#e2e8f0", 22)
+        rounded(draw, (86, y, WIDTH - 86, y + 500), "#fbfcff", "#e2e8f0", 22)
         yy = draw_wrapped(draw, (116, y + 24), item["title"], FONTS["body_bold"], COLORS["ink"], 820, 8, 2)
         yy += 12
         draw.text((116, yy), "相关资产", font=FONTS["small"], fill=COLORS["muted"])
         yy = draw_wrapped(draw, (116, yy + 32), item["assets"], FONTS["body_small_bold"], COLORS["green"], 820, 7, 1)
         yy += 10
-        draw.text((116, yy), "事实摘要", font=FONTS["small"], fill=COLORS["muted"])
+        draw.text((116, yy), "事件摘要", font=FONTS["small"], fill=COLORS["muted"])
         yy = draw_wrapped(draw, (116, yy + 32), item["facts"], FONTS["body_small"], COLORS["ink"], 820, 7, 3)
         yy += 10
         draw.text((116, yy), "意义", font=FONTS["small"], fill=COLORS["muted"])
-        draw_wrapped(draw, (116, yy + 32), item["why"], FONTS["body_small"], COLORS["ink"], 820, 7, 2)
-        y += 462
+        yy = draw_wrapped(draw, (116, yy + 32), item["why"], FONTS["body_small"], COLORS["ink"], 820, 7, 1)
+        yy += 10
+        draw.text((116, yy), "A股产业链指引", font=FONTS["small"], fill=COLORS["muted"])
+        draw_wrapped(draw, (116, yy + 32), item["a_share"], FONTS["body_small_bold"], COLORS["green"], 820, 7, 1)
+        y += 525
     return img
 
 
