@@ -1,6 +1,6 @@
 const GDELT_ENDPOINT = "https://api.gdeltproject.org/api/v2/doc/doc";
 const YAHOO_RSS_ENDPOINT = "https://feeds.finance.yahoo.com/rss/2.0/headline";
-const MAX_NEWS_AGE_HOURS = 54;
+const MAX_NEWS_AGE_HOURS = 30;
 const OFFICIAL_RSS_SOURCES = [
   {
     source: "NVIDIA Newsroom",
@@ -403,9 +403,20 @@ function sleep(ms) {
 
 function reportDateToReferenceTime(reportDate) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(String(reportDate || ""))) {
-    return new Date(`${reportDate}T00:30:00+08:00`);
+    return new Date(`${reportDate}T08:30:00+08:00`);
   }
   return new Date();
+}
+
+function formatDateInTimeZone(date, timeZone) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
 function parsePublishedAt(value) {
@@ -428,11 +439,13 @@ function parsePublishedAt(value) {
 function isFreshArticle(article, referenceTime) {
   const published = parsePublishedAt(article?.published_at || article?.seendate || article?.published);
   if (!published) {
-    return true;
+    return false;
   }
 
   const ageHours = (referenceTime.getTime() - published.getTime()) / 36e5;
-  return ageHours <= MAX_NEWS_AGE_HOURS && ageHours >= -18;
+  const targetMarketDate = formatDateInTimeZone(referenceTime, "America/New_York");
+  const publishedMarketDate = formatDateInTimeZone(published, "America/New_York");
+  return publishedMarketDate === targetMarketDate && ageHours <= MAX_NEWS_AGE_HOURS && ageHours >= -6;
 }
 
 async function fetchGdeltArticles(query, maxRecords = 20) {
