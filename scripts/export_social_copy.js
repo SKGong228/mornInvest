@@ -137,6 +137,8 @@ function buildCopy(data) {
     "#AI",
     "#半导体",
     "#光模块",
+    "#CPO",
+    "#光互连",
     "#MornInvest",
   ].join(" ");
 
@@ -150,7 +152,7 @@ function buildCopy(data) {
     "今天主要看三件事：",
     signalLines,
     "",
-    data.aShareImpact ? `A股映射：${data.aShareImpact}，重点还是看美股信号能否传导到算力、光模块、半导体和云计算链条。` : "",
+    data.aShareImpact ? `A股映射：${data.aShareImpact}，重点看美股信号能否传导到算力、光模块/CPO、半导体设备、PCB和云计算链条。` : "",
     "",
     "详细拆解放在图里。本文仅用于信息整理，不构成投资建议。",
     "",

@@ -127,6 +127,15 @@ async function listSubscribers(limit = 1000) {
   );
 }
 
+async function listDeliveriesForReport(reportId, limit = 5000) {
+  const safeLimit = Math.min(Math.max(Number(limit) || 5000, 1), 5000);
+  return supabaseFetch(
+    `email_deliveries?select=email,status,provider,error_message,created_at,sent_at&report_id=eq.${encodeURIComponent(
+      reportId
+    )}&order=created_at.desc&limit=${safeLimit}`
+  );
+}
+
 async function getSentDelivery({ reportId, email }) {
   const rows = await supabaseFetch(
     `email_deliveries?select=*&report_id=eq.${encodeURIComponent(
@@ -156,6 +165,7 @@ module.exports = {
   getSentDelivery,
   insertDelivery,
   insertReport,
+  listDeliveriesForReport,
   listReadyReports,
   listActiveSubscribers,
   listSubscribers,
