@@ -1,5 +1,6 @@
 const { json, requireCronSecret } = require("../_lib/http");
 const { sendEmail } = require("../_lib/resend");
+const { buildEmailSummary } = require("../_lib/email_summary");
 const {
   getReadyReportForDate,
   getSentDelivery,
@@ -66,11 +67,12 @@ module.exports = async function morningSend(req, res) {
       }
 
       try {
+        const emailSummary = buildEmailSummary(report);
         const sent = await sendEmail({
           to: subscriber.email,
           subject: report.title,
-          html: report.html_body,
-          text: report.text_body,
+          html: emailSummary.html,
+          text: emailSummary.text,
         });
 
         await insertDelivery({
