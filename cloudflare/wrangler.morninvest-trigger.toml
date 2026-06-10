@@ -1,0 +1,16 @@
+name = "morninvest-trigger"
+main = "morninvest-trigger-worker.js"
+compatibility_date = "2025-01-01"
+
+[triggers]
+crons = [
+  "30 23 * * *",
+  "0 0 * * *",
+  "15 0 * * *",
+  "35 0 * * *"
+]
+
+[vars]
+GITHUB_OWNER = "SKGong228"
+GITHUB_REPO = "mornInvest"
+GITHUB_REF = "main"
