@@ -232,7 +232,7 @@
       <section class="stats" id="analytics-stats" hidden>
         <div class="stat"><span>7日网页阅读</span><strong id="report-views-count">0</strong></div>
         <div class="stat"><span>7日复制正文</span><strong id="report-copies-count">0</strong></div>
-        <div class="stat"><span>7日 CTA 点击</span><strong id="report-clicks-count">0</strong></div>
+        <div class="stat"><span>最近事件数</span><strong id="recent-events-count">0</strong></div>
         <div class="stat"><span>阅读日报数</span><strong id="read-report-count">0</strong></div>
       </section>
 
@@ -281,7 +281,7 @@
       const watchlistCount = document.querySelector("#watchlist-count");
       const reportViewsCount = document.querySelector("#report-views-count");
       const reportCopiesCount = document.querySelector("#report-copies-count");
-      const reportClicksCount = document.querySelector("#report-clicks-count");
+      const recentEventsCount = document.querySelector("#recent-events-count");
       const readReportCount = document.querySelector("#read-report-count");
 
       function formatDate(value) {
@@ -337,7 +337,7 @@
 
         reportViewsCount.textContent = analytics.report_views_7d || 0;
         reportCopiesCount.textContent = analytics.report_copies_7d || 0;
-        reportClicksCount.textContent = analytics.report_cta_clicks_7d || 0;
+        recentEventsCount.textContent = (analytics.recent_events || []).length || 0;
         readReportCount.textContent = reports.length || 0;
 
         reportEventRows.innerHTML = reports
