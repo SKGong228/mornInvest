@@ -63,8 +63,62 @@ function clean(value = "") {
     .trim();
 }
 
+const SOCIAL_TEXT_REPLACEMENTS = [
+  [/\bNVIDIA\b|\bNvidia\b|英伟达/g, "NVDA"],
+  [/\bAdvanced Micro Devices\b/g, "AMD"],
+  [/\bBroadcom\b|博通/g, "AVGO"],
+  [/\bMarvell\b/g, "MRVL"],
+  [/\bMicron\b|美光/g, "MU"],
+  [/\bTaiwan Semiconductor\b|\bTSMC\b/g, "TSM"],
+  [/\bApplied Materials\b/g, "AMAT"],
+  [/\bLam Research\b/g, "LRCX"],
+  [/\bKLA\b/g, "KLAC"],
+  [/\bASML\b/g, "ASML"],
+  [/\bIntel\b|英特尔/g, "INTC"],
+  [/\bQualcomm\b|高通/g, "QCOM"],
+  [/\bArm\b/g, "ARM"],
+  [/\bCoherent\b/g, "COHR"],
+  [/\bLumentum\b/g, "LITE"],
+  [/\bApplied Optoelectronics\b/g, "AAOI"],
+  [/\bCorning\b|康宁/g, "GLW"],
+  [/\bArista\b/g, "ANET"],
+  [/\bCisco\b|思科/g, "CSCO"],
+  [/\bMicrosoft\b|微软/g, "MSFT"],
+  [/\bAmazon\b|亚马逊/g, "AMZN"],
+  [/\bAlphabet\b|\bGoogle\b|谷歌/g, "GOOGL"],
+  [/\bMeta\b/g, "META"],
+  [/\bApple\b|苹果/g, "AAPL"],
+  [/\bTesla\b|特斯拉/g, "TSLA"],
+  [/\bOracle\b/g, "ORCL"],
+  [/\bAdobe\b/g, "ADBE"],
+  [/\bSalesforce\b/g, "CRM"],
+  [/\bServiceNow\b/g, "NOW"],
+  [/\bSnowflake\b/g, "SNOW"],
+  [/\bMongoDB\b/g, "MDB"],
+  [/\bDatadog\b/g, "DDOG"],
+  [/\bCloudflare\b/g, "NET"],
+  [/SK\s*hynix/gi, "HBM 供应链"],
+  [/台积电/g, "代工链"],
+  [/(中际旭创|新易盛|天孚通信|光迅科技)/g, "光模块链"],
+  [/(工业富联|浪潮信息|中科曙光)/g, "服务器链"],
+  [/(沪电股份|胜宏科技|深南电路)/g, "PCB链"],
+  [/(北方华创|中微公司|拓荆科技)/g, "设备链"],
+  [/(兆易创新|澜起科技|长电科技|通富微电)/g, "存储封测链"],
+  [/(金山办公|用友网络|宝信软件|光环新网)/g, "软件云链"],
+  [/https?:\/\/\S+/g, ""],
+  [/\b(?:www\.)?morninvest\.com\S*/gi, ""],
+];
+
+function socialText(value = "") {
+  let output = clean(value);
+  for (const [pattern, replacement] of SOCIAL_TEXT_REPLACEMENTS) {
+    output = output.replace(pattern, replacement);
+  }
+  return output.replace(/\s+/g, " ").trim();
+}
+
 function compactText(value = "", maxLength = 150) {
-  const normalized = clean(value).replace(/\s+/g, " ");
+  const normalized = socialText(value).replace(/\s+/g, " ");
   if (normalized.length <= maxLength) {
     return normalized;
   }
@@ -86,7 +140,7 @@ function compactText(value = "", maxLength = 150) {
 }
 
 function html(value = "") {
-  return String(value)
+  return socialText(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -440,7 +494,7 @@ function cardFocus(data) {
       <div class="bullet"><h2>重点公司</h2><p>${html(compactText(data.focus.companies, 120))}</p></div>
       <div class="bullet"><h2>A股大方向</h2><p>${html(compactText(aShareDirection, 190))}</p></div>
       <div class="bullet"><h2>重点映射方向</h2><p>${html(compactText(data.aShare.directions, 150))}</p></div>
-      <div class="cta"><span>完整日报与邮件订阅</span><strong>morninvest.com</strong></div>
+      <div class="cta"><span>完整内容见主页订阅</span><strong>MornInvest</strong></div>
     `,
   });
 }

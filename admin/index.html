@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MornInvest Admin | 订阅用户</title>
+    <title>MornInvest Admin | 订阅与阅读统计</title>
     <meta name="robots" content="noindex,nofollow" />
     <style>
       :root {
@@ -204,8 +204,8 @@
     <main>
       <div class="top">
         <div>
-          <h1>MornInvest 订阅用户</h1>
-          <p class="status">输入管理员密钥后查看当前订阅列表。</p>
+          <h1>MornInvest 订阅与阅读统计</h1>
+          <p class="status">输入管理员密钥后查看当前订阅列表和网页阅读量。</p>
         </div>
         <a class="back" href="../index.html">返回首页</a>
       </div>
@@ -229,6 +229,25 @@
         <div class="stat"><span>有 Watchlist</span><strong id="watchlist-count">0</strong></div>
       </section>
 
+      <section class="stats" id="analytics-stats" hidden>
+        <div class="stat"><span>7日网页阅读</span><strong id="report-views-count">0</strong></div>
+        <div class="stat"><span>7日复制正文</span><strong id="report-copies-count">0</strong></div>
+        <div class="stat"><span>7日 CTA 点击</span><strong id="report-clicks-count">0</strong></div>
+        <div class="stat"><span>阅读日报数</span><strong id="read-report-count">0</strong></div>
+      </section>
+
+      <section class="table-shell" id="analytics-shell" hidden>
+        <table>
+          <thead>
+            <tr>
+              <th>日报</th>
+              <th>最近 7 天事件数</th>
+            </tr>
+          </thead>
+          <tbody id="report-event-rows"></tbody>
+        </table>
+      </section>
+
       <section class="table-shell" id="table-shell" hidden>
         <table>
           <thead>
@@ -250,13 +269,20 @@
       const keyInput = document.querySelector("#admin-key");
       const status = document.querySelector("#status");
       const stats = document.querySelector("#stats");
+      const analyticsStats = document.querySelector("#analytics-stats");
+      const analyticsShell = document.querySelector("#analytics-shell");
       const tableShell = document.querySelector("#table-shell");
       const rows = document.querySelector("#subscriber-rows");
+      const reportEventRows = document.querySelector("#report-event-rows");
 
       const totalCount = document.querySelector("#total-count");
       const activeCount = document.querySelector("#active-count");
       const inactiveCount = document.querySelector("#inactive-count");
       const watchlistCount = document.querySelector("#watchlist-count");
+      const reportViewsCount = document.querySelector("#report-views-count");
+      const reportCopiesCount = document.querySelector("#report-copies-count");
+      const reportClicksCount = document.querySelector("#report-clicks-count");
+      const readReportCount = document.querySelector("#read-report-count");
 
       function formatDate(value) {
         if (!value) return "";
@@ -305,24 +331,64 @@
         tableShell.hidden = false;
       }
 
+      function renderAnalytics(data) {
+        const analytics = data.stats || {};
+        const reports = analytics.report_counts || [];
+
+        reportViewsCount.textContent = analytics.report_views_7d || 0;
+        reportCopiesCount.textContent = analytics.report_copies_7d || 0;
+        reportClicksCount.textContent = analytics.report_cta_clicks_7d || 0;
+        readReportCount.textContent = reports.length || 0;
+
+        reportEventRows.innerHTML = reports
+          .map(
+            (item) => `
+              <tr>
+                <td><strong>${escapeHtml(item.report)}</strong></td>
+                <td>${escapeHtml(item.count)}</td>
+              </tr>
+            `
+          )
+          .join("");
+
+        if (!reports.length) {
+          reportEventRows.innerHTML = '<tr><td class="empty" colspan="2">暂无阅读数据。</td></tr>';
+        }
+
+        analyticsStats.hidden = false;
+        analyticsShell.hidden = false;
+      }
+
       async function loadSubscribers(key) {
         status.className = "status";
         status.textContent = "正在读取...";
 
-        const response = await fetch("/api/subscribers", {
-          headers: {
-            "x-admin-secret": key,
-          },
-        });
-        const data = await response.json();
+        const [subscriberResponse, analyticsResponse] = await Promise.all([
+          fetch("/api/subscribers", {
+            headers: {
+              "x-admin-secret": key,
+            },
+          }),
+          fetch("/api/analytics", {
+            headers: {
+              "x-admin-secret": key,
+            },
+          }),
+        ]);
+        const data = await subscriberResponse.json();
+        const analyticsData = await analyticsResponse.json();
 
-        if (!response.ok || !data.ok || !data.subscribers) {
+        if (!subscriberResponse.ok || !data.ok || !data.subscribers) {
           throw new Error(data.message || "读取失败，请检查管理员密钥。");
+        }
+        if (!analyticsResponse.ok || !analyticsData.ok) {
+          throw new Error(analyticsData.message || "统计读取失败，请检查管理员密钥。");
         }
 
         localStorage.setItem("morninvest_admin_key", key);
         renderSubscribers(data);
-        status.textContent = "已加载订阅用户。";
+        renderAnalytics(analyticsData);
+        status.textContent = "已加载订阅用户和阅读统计。";
       }
 
       form.addEventListener("submit", async (event) => {

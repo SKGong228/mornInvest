@@ -58,6 +58,58 @@ function clean(value = "") {
     .trim();
 }
 
+const SOCIAL_TEXT_REPLACEMENTS = [
+  [/\bNVIDIA\b|\bNvidia\b|英伟达/g, "NVDA"],
+  [/\bAdvanced Micro Devices\b/g, "AMD"],
+  [/\bBroadcom\b|博通/g, "AVGO"],
+  [/\bMarvell\b/g, "MRVL"],
+  [/\bMicron\b|美光/g, "MU"],
+  [/\bTaiwan Semiconductor\b|\bTSMC\b/g, "TSM"],
+  [/\bApplied Materials\b/g, "AMAT"],
+  [/\bLam Research\b/g, "LRCX"],
+  [/\bKLA\b/g, "KLAC"],
+  [/\bIntel\b|英特尔/g, "INTC"],
+  [/\bQualcomm\b|高通/g, "QCOM"],
+  [/\bCoherent\b/g, "COHR"],
+  [/\bLumentum\b/g, "LITE"],
+  [/\bApplied Optoelectronics\b/g, "AAOI"],
+  [/\bCorning\b|康宁/g, "GLW"],
+  [/\bArista\b/g, "ANET"],
+  [/\bCisco\b|思科/g, "CSCO"],
+  [/\bMicrosoft\b|微软/g, "MSFT"],
+  [/\bAmazon\b|亚马逊/g, "AMZN"],
+  [/\bAlphabet\b|\bGoogle\b|谷歌/g, "GOOGL"],
+  [/\bMeta\b/g, "META"],
+  [/\bApple\b|苹果/g, "AAPL"],
+  [/\bTesla\b|特斯拉/g, "TSLA"],
+  [/\bOracle\b/g, "ORCL"],
+  [/\bAdobe\b/g, "ADBE"],
+  [/\bSalesforce\b/g, "CRM"],
+  [/\bServiceNow\b/g, "NOW"],
+  [/\bSnowflake\b/g, "SNOW"],
+  [/\bMongoDB\b/g, "MDB"],
+  [/\bDatadog\b/g, "DDOG"],
+  [/\bCloudflare\b/g, "NET"],
+  [/SK\s*hynix/gi, "HBM 供应链"],
+  [/台积电/g, "代工链"],
+  [/(中际旭创|新易盛|天孚通信|光迅科技)/g, "光模块链"],
+  [/(工业富联|浪潮信息|中科曙光)/g, "服务器链"],
+  [/(沪电股份|胜宏科技|深南电路)/g, "PCB链"],
+  [/(北方华创|中微公司|拓荆科技)/g, "设备链"],
+  [/(兆易创新|澜起科技|长电科技|通富微电)/g, "存储封测链"],
+  [/(金山办公|用友网络|宝信软件|光环新网)/g, "软件云链"],
+  [/https?:\/\/\S+/g, ""],
+  [/\b(?:www\.)?morninvest\.com\S*/gi, ""],
+];
+
+function socialText(value = "") {
+  let output = clean(value);
+  for (const [pattern, replacement] of SOCIAL_TEXT_REPLACEMENTS) {
+    output = output.replace(pattern, replacement);
+  }
+  return output.replace(/\s+/g, " ").trim();
+}
+
 function section(markdown, number) {
   const match = String(markdown).match(
     new RegExp(`##\\s+${number}\\.\\s+.+?(?=\\n##\\s+\\d+\\.|$)`, "s")
@@ -128,7 +180,7 @@ function compactDate(date) {
 function buildCopy(data) {
   const title = `MornInvest｜${compactDate(data.date)}美股科技主线：${data.keywords.slice(0, 2).join("、") || "AI链条"}`;
   const signalLines = data.signals
-    .map((signal, index) => `${index + 1}. ${signal.title}：${signal.conclusion || signal.assets}`)
+    .map((signal, index) => `${index + 1}. ${socialText(signal.title)}：${socialText(signal.conclusion || signal.assets)}`)
     .join("\n");
   const tags = [
     "#美股",
@@ -147,12 +199,12 @@ function buildCopy(data) {
     title,
     "",
     `【小红书正文】`,
-    data.conclusion,
+    socialText(data.conclusion),
     "",
     "今天主要看三件事：",
     signalLines,
     "",
-    data.aShareImpact ? `A股映射：${data.aShareImpact}，重点看美股信号能否传导到算力、光模块/CPO、半导体设备、PCB和云计算链条。` : "",
+    data.aShareImpact ? `A股映射：${socialText(data.aShareImpact)}，重点看美股信号能否传导到算力、光模块/CPO、半导体设备、PCB和云计算链条。` : "",
     "",
     "详细拆解放在图里。本文仅用于信息整理，不构成投资建议。",
     "",
@@ -163,14 +215,14 @@ function buildCopy(data) {
   const xueqiu = [
     `【雪球导语】`,
     `MornInvest ${data.date} 美股科技晨报。`,
-    data.conclusion,
+    socialText(data.conclusion),
     "",
-    data.mainline,
+    socialText(data.mainline),
     "",
     "重点信号：",
     signalLines,
     "",
-    data.focus ? `接下来重点看：${data.focus}` : "",
+    data.focus ? `接下来重点看：${socialText(data.focus)}` : "",
     "",
     "完整正文见 Word 导入版本。本文仅用于信息整理，不构成投资建议。",
   ].filter(Boolean).join("\n");

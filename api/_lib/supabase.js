@@ -157,14 +157,35 @@ async function insertDelivery(delivery) {
   return created;
 }
 
+async function insertAnalyticsEvent(event) {
+  const [created] = await supabaseFetch("analytics_events", {
+    method: "POST",
+    headers: {
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify(event),
+  });
+
+  return created;
+}
+
+async function listAnalyticsEvents(limit = 5000) {
+  const safeLimit = Math.min(Math.max(Number(limit) || 5000, 1), 5000);
+  return supabaseFetch(
+    `analytics_events?select=id,event_type,report_id,report_date,path,session_id,created_at&order=created_at.desc&limit=${safeLimit}`
+  );
+}
+
 module.exports = {
   getSupabaseConfig,
   getLatestReport,
   getReportById,
   getReadyReportForDate,
   getSentDelivery,
+  insertAnalyticsEvent,
   insertDelivery,
   insertReport,
+  listAnalyticsEvents,
   listDeliveriesForReport,
   listReadyReports,
   listActiveSubscribers,

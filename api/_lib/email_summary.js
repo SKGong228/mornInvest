@@ -124,7 +124,11 @@ function parseReport(report) {
 
 function reportUrl(report) {
   const baseUrl = String(process.env.PUBLIC_SITE_URL || "https://www.morninvest.com").replace(/\/$/, "");
-  return `${baseUrl}/reports/${report.id ? `?id=${encodeURIComponent(report.id)}` : ""}`;
+  const params = new URLSearchParams();
+  if (report.id) {
+    params.set("id", report.id);
+  }
+  return `${baseUrl}/reports/?${params.toString()}`;
 }
 
 function chip(label, value) {

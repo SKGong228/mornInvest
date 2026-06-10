@@ -472,6 +472,37 @@
         return type === "weekly" ? "周报" : "日报";
       }
 
+      function getSessionId() {
+        const key = "morninvest_session_id";
+        let value = localStorage.getItem(key);
+        if (!value) {
+          value = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+          localStorage.setItem(key, value);
+        }
+        return value;
+      }
+
+      function trackEvent(eventType, reportItem) {
+        if (!reportItem || !navigator.sendBeacon) {
+          return;
+        }
+
+        const dedupeKey = `morninvest:${eventType}:${reportItem.id}:${new Date().toISOString().slice(0, 10)}`;
+        if (eventType === "report_view" && sessionStorage.getItem(dedupeKey)) {
+          return;
+        }
+        sessionStorage.setItem(dedupeKey, "1");
+
+        const payload = JSON.stringify({
+          event_type: eventType,
+          report_id: reportItem.id,
+          report_date: reportItem.report_date,
+          path: window.location.pathname + window.location.search,
+          session_id: getSessionId(),
+        });
+        navigator.sendBeacon("/api/analytics", new Blob([payload], { type: "application/json" }));
+      }
+
       function selectReport(reportId, replaceHistory = false) {
         const next = state.reports.find((item) => item.id === reportId);
         if (!next) return;
@@ -497,6 +528,7 @@
         } else {
           window.history.pushState(null, "", url);
         }
+        trackEvent("report_view", next);
       }
 
       function renderList() {
@@ -552,6 +584,7 @@
 
         try {
           await navigator.clipboard.writeText(state.selected.text_body || "");
+          trackEvent("report_copy", state.selected);
           copyButton.textContent = "已复制";
           setTimeout(() => {
             copyButton.textContent = "复制纯文本";
