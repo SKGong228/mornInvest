@@ -63,6 +63,28 @@ function clean(value = "") {
     .trim();
 }
 
+function compactText(value = "", maxLength = 150) {
+  const normalized = clean(value).replace(/\s+/g, " ");
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+
+  const sentences = normalized
+    .split(/(?<=[。！？；;])\s*/)
+    .filter(Boolean);
+  let output = "";
+  for (const sentence of sentences) {
+    if ((output + sentence).length > maxLength) {
+      break;
+    }
+    output += sentence;
+  }
+  if (output.length >= 48) {
+    return output;
+  }
+  return `${normalized.slice(0, maxLength - 1)}…`;
+}
+
 function html(value = "") {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -138,7 +160,9 @@ function parseNews(markdown) {
       title: clean(chunk.split("\n")[0]),
       assets: fieldValue(chunk, "相关资产"),
       facts: fieldValue(chunk, "事件摘要") || fieldValue(chunk, "事实摘要"),
+      market: fieldValue(chunk, "市场反应"),
       why: fieldValue(chunk, "意义") || fieldValue(chunk, "为什么重要"),
+      read: fieldValue(chunk, "影响解读") || fieldValue(chunk, "我的判断"),
       aShare: fieldValue(chunk, "A股产业链指引") || fieldValue(chunk, "后续观察"),
     }))
     .slice(0, 4);
@@ -150,6 +174,7 @@ function parseReport(report) {
   const sec1 = section(markdown, 1);
   const sec5 = section(markdown, 5);
   const sec6 = section(markdown, 6);
+  const sec7 = section(markdown, 7);
   return {
     date: report.report_date,
     core: {
@@ -170,6 +195,12 @@ function parseReport(report) {
     plain: {
       better: fieldValue(sec6, "更准确的理解是"),
     },
+    aShare: {
+      impact: fieldValue(sec7, "对 A 股大方向的影响"),
+      directions: fieldValue(sec7, "可能受影响方向"),
+      logic: fieldValue(sec7, "传导逻辑"),
+      warning: fieldValue(sec7, "需要警惕"),
+    },
   };
 }
 
@@ -181,7 +212,9 @@ function field(label, body, className = "") {
   return `<div class="field ${className}"><span>${html(label)}</span><p>${html(body)}</p></div>`;
 }
 
-function shell({ page, date, kicker, body }) {
+const TOTAL_PAGES = 9;
+
+function shell({ page, date, kicker, body, cover = false }) {
   return `<!doctype html>
   <html lang="zh-CN">
     <head>
@@ -190,98 +223,135 @@ function shell({ page, date, kicker, body }) {
         * { box-sizing: border-box; }
         html, body { width:${WIDTH}px; height:${HEIGHT}px; margin:0; overflow:hidden; }
         body {
-          background:#f6f3ee;
+          background:#eef1f4;
           color:#111827;
-          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-            "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-          line-height:1.58;
+          font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC",
+            "Noto Sans SC", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          line-height:1.5;
           -webkit-font-smoothing: antialiased;
         }
-        .page { width:${WIDTH}px; height:${HEIGHT}px; padding:42px 52px; }
+        .page { width:${WIDTH}px; height:${HEIGHT}px; padding:34px 42px; }
         .card {
           position:relative;
-          width:976px;
-          height:1356px;
+          width:996px;
+          height:1372px;
           border:1px solid #d9dee8;
-          border-radius:28px;
+          border-radius:22px;
           background:#fff;
           overflow:hidden;
-          box-shadow:0 18px 48px rgba(12,17,29,.08);
+          box-shadow:0 18px 46px rgba(12,17,29,.10);
         }
-        .topbar { height:14px; background:#0f766e; }
-        .head { display:grid; grid-template-columns:1fr auto; gap:24px; padding:32px 34px 0; }
-        .brand { color:#0f766e; font-size:30px; font-weight:700; letter-spacing:0; }
-        .kicker { color:#64748b; font-size:22px; margin-top:2px; }
-        .date { color:#64748b; font-size:22px; padding-top:8px; }
-        .content { padding:76px 34px 90px; }
-        .footer { position:absolute; left:34px; right:34px; bottom:28px; display:flex; justify-content:space-between; color:#64748b; font-size:18px; }
-        h1 { margin:0 0 24px; font-size:58px; line-height:1.12; letter-spacing:0; font-weight:800; }
-        h2 { margin:0 0 18px; font-size:38px; line-height:1.18; letter-spacing:0; font-weight:760; }
-        h3 { margin:0 0 10px; font-size:28px; line-height:1.28; font-weight:760; }
-        p { margin:0; font-size:27px; line-height:1.62; letter-spacing:0; }
+        .card.cover { color:#f8fafc; border-color:#111827; background:#080b10; }
+        .cover:before {
+          content:""; position:absolute; inset:0;
+          background:
+            linear-gradient(145deg, rgba(20,184,166,.28), transparent 34%),
+            radial-gradient(circle at 84% 18%, rgba(45,212,191,.28), transparent 28%),
+            linear-gradient(180deg, rgba(255,255,255,.04), transparent 42%);
+        }
+        .cover .content, .cover .head { position:relative; z-index:1; }
+        .topbar { height:10px; background:#0f766e; }
+        .head { display:grid; grid-template-columns:1fr auto; gap:20px; padding:28px 34px 0; }
+        .brand { color:#0f766e; font-size:28px; font-weight:850; letter-spacing:.02em; }
+        .kicker { color:#64748b; font-size:20px; margin-top:2px; font-weight:700; }
+        .date { color:#64748b; font-size:20px; padding-top:6px; font-weight:700; }
+        .cover .brand { color:#7dd3fc; }
+        .cover .kicker, .cover .date { color:#94a3b8; }
+        .content { padding:58px 36px 86px; }
+        .footer { position:absolute; left:34px; right:34px; bottom:25px; display:flex; justify-content:space-between; color:#64748b; font-size:17px; }
+        .cover .footer { color:#94a3b8; z-index:1; }
+        h1 { margin:0 0 24px; font-size:56px; line-height:1.14; letter-spacing:0; font-weight:850; }
+        h2 { margin:0 0 16px; font-size:34px; line-height:1.2; letter-spacing:0; font-weight:820; }
+        h3 { margin:0 0 10px; font-size:26px; line-height:1.26; font-weight:800; }
+        p { margin:0; font-size:25px; line-height:1.58; letter-spacing:0; }
         .muted { color:#64748b; }
         .green { color:#0f766e; }
-        .tags { display:flex; flex-wrap:wrap; gap:12px; margin-top:30px; }
-        .tag { display:inline-flex; align-items:center; min-height:42px; padding:0 15px; border-radius:999px; background:#e6f6f3; color:#0f766e; font-size:22px; font-weight:700; }
-        .panel { border:1px solid #e2e8f0; border-radius:22px; background:#fbfcff; padding:26px 30px; overflow:hidden; }
-        .status-strip { display:grid; grid-template-columns:180px 1fr; gap:24px; margin-top:28px; padding:18px 24px; border-radius:18px; }
-        .status-strip .label { color:#64748b; font-size:20px; font-weight:700; }
-        .status-strip .risk { margin-top:8px; color:#b56b18; font-size:38px; line-height:1.1; }
-        .status-strip .state { margin-top:8px; font-size:30px; line-height:1.2; }
-        .bullet { position:relative; padding-left:24px; margin-bottom:28px; }
+        .tags { display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
+        .tag { display:inline-flex; align-items:center; min-height:38px; padding:0 13px; border-radius:999px; background:#e6f6f3; color:#0f766e; font-size:20px; font-weight:800; }
+        .cover .tag { background:rgba(20,184,166,.14); border:1px solid rgba(45,212,191,.30); color:#ccfbf1; }
+        .panel { border:1px solid #e2e8f0; border-radius:16px; background:#fbfcff; padding:24px 28px; overflow:hidden; }
+        .status-strip { display:grid; grid-template-columns:180px 1fr; gap:22px; margin-top:24px; padding:18px 22px; border-radius:14px; }
+        .status-strip .label { color:#64748b; font-size:19px; font-weight:800; }
+        .status-strip .risk { margin-top:8px; color:#b56b18; font-size:36px; line-height:1.1; }
+        .status-strip .state { margin-top:8px; font-size:29px; line-height:1.2; }
+        .bullet { position:relative; padding-left:24px; margin-bottom:23px; }
         .bullet:before { content:""; position:absolute; left:0; top:13px; width:12px; height:12px; border-radius:50%; background:#0f766e; }
-        .bullet.compact { margin-bottom:22px; }
+        .bullet.compact { margin-bottom:20px; }
         .bullet.compact h2 { margin-bottom:10px; }
-        .core-mainline { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:5; overflow:hidden; }
-        .field { margin-top:13px; }
-        .field span { display:block; margin-bottom:3px; color:#64748b; font-size:21px; font-weight:760; }
-        .field p { font-size:25px; line-height:1.52; }
-        .metric { display:grid; grid-template-columns:1fr 310px; gap:18px; align-items:center; height:96px; margin-bottom:15px; border:1px solid #e2e8f0; border-radius:18px; padding:14px 28px; background:#fbfcff; }
-        .metric strong { display:block; font-size:28px; line-height:1.1; font-weight:680; }
-        .metric small { color:#64748b; font-size:19px; }
-        .metric b { color:#0f766e; font-size:28px; font-weight:680; }
-        .signal { height:303px; margin-bottom:20px; }
+        .core-mainline { font-size:25px; line-height:1.56; }
+        .field { margin-top:14px; }
+        .field span { display:block; margin-bottom:5px; color:#64748b; font-size:19px; font-weight:820; }
+        .field p { font-size:24px; line-height:1.48; }
+        .metric { display:grid; grid-template-columns:1fr 250px; gap:18px; align-items:center; min-height:82px; margin-bottom:12px; border:1px solid #e2e8f0; border-radius:14px; padding:13px 20px; background:#fbfcff; }
+        .metric strong { display:block; font-size:25px; line-height:1.12; font-weight:760; }
+        .metric small { display:block; margin-top:3px; color:#64748b; font-size:17px; line-height:1.25; }
+        .metric b { color:#0f766e; font-size:25px; font-weight:800; text-align:right; }
+        .signal { margin-bottom:16px; }
         .signal-title { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
         .signal-title .tag { flex:0 0 auto; margin-top:0; }
-        .news { height:500px; margin-bottom:22px; }
-        .news h2 { font-size:30px !important; line-height:1.22; margin-bottom:12px; }
-        .news .field { margin-top:10px; }
-        .news .field span { font-size:20px; }
-        .news .field p { font-size:23px; line-height:1.45; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
-        .news .assets p { -webkit-line-clamp:1; color:#0f766e; }
-        .news .facts p { -webkit-line-clamp:2; }
-        .news .why p { -webkit-line-clamp:1; }
-        .news .a-share p { -webkit-line-clamp:1; color:#0f766e; }
-        .cta { position:absolute; left:34px; right:34px; bottom:112px; border-radius:24px; background:#0f766e; color:white; padding:28px 32px; }
+        .signal h2 { font-size:27px; margin-bottom:8px; }
+        .signal p { font-size:22px; line-height:1.45; }
+        .news-page h1 { font-size:43px; line-height:1.18; margin-bottom:20px; }
+        .news-index { color:#0f766e; font-size:22px; font-weight:850; margin-bottom:10px; }
+        .news-block { border-left:6px solid #14b8a6; padding-left:22px; }
+        .news-field { margin-top:17px; }
+        .news-field span { display:block; color:#64748b; font-size:20px; font-weight:850; margin-bottom:6px; }
+        .news-field p { font-size:24px; line-height:1.5; }
+        .news-field.assets p, .news-field.a-share p { color:#0f766e; font-weight:750; }
+        .cover-title { margin-top:126px; font-size:80px; line-height:1.06; letter-spacing:0; }
+        .cover-subtitle { margin-top:30px; max-width:840px; color:#dbeafe; font-size:30px; line-height:1.46; }
+        .cover-meta { margin-top:52px; display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        .cover-box { border:1px solid rgba(148,163,184,.24); border-radius:16px; padding:20px 22px; background:rgba(15,23,42,.58); }
+        .cover-box span { display:block; color:#94a3b8; font-size:19px; font-weight:760; margin-bottom:7px; }
+        .cover-box strong { display:block; color:#f8fafc; font-size:32px; line-height:1.18; }
+        .cta { position:absolute; left:34px; right:34px; bottom:112px; border-radius:18px; background:#0f766e; color:white; padding:24px 28px; }
         .cta span { display:block; color:#d1fae5; font-size:21px; }
         .cta strong { display:block; margin-top:8px; font-size:46px; line-height:1.1; font-weight:500; }
       </style>
     </head>
     <body>
       <main class="page">
-        <section class="card">
+        <section class="card ${cover ? "cover" : ""}">
           <div class="topbar"></div>
           <header class="head">
             <div><div class="brand">MornInvest</div><div class="kicker">${html(kicker)}</div></div>
             <div class="date">${html(date)}</div>
           </header>
           <div class="content">${body}</div>
-          <footer class="footer"><span>基于公开信息整理，不构成投资建议</span><span>${String(page).padStart(2, "0")}/06</span></footer>
+          <footer class="footer"><span>基于公开信息整理，不构成投资建议</span><span>${String(page).padStart(2, "0")}/${String(TOTAL_PAGES).padStart(2, "0")}</span></footer>
         </section>
       </main>
     </body>
   </html>`;
 }
 
-function cardCoreCombined(data) {
+function cardCover(data) {
   return shell({
     page: 1,
+    date: data.date,
+    kicker: "美股科技晨报",
+    cover: true,
+    body: `
+      <h1 class="cover-title">今天科技股<br>在交易什么</h1>
+      <p class="cover-subtitle">${html(compactText(data.core.conclusion, 72))}</p>
+      <div class="tags">${data.core.keywords.map(tag).join("")}</div>
+      <div class="cover-meta">
+        <div class="cover-box"><span>风险等级</span><strong>${html(data.core.risk)}</strong></div>
+        <div class="cover-box"><span>市场状态</span><strong>${html(data.marketState || "板块分化")}</strong></div>
+      </div>
+    `,
+  });
+}
+
+function cardCoreCombined(data) {
+  return shell({
+    page: 2,
     date: data.date,
     kicker: "0. 今日核心判断",
     body: `
       <h1>今日美股科技主线</h1>
       <div class="bullet compact"><h2>一句话结论</h2><p style="font-size:30px;line-height:1.54;">${html(data.core.conclusion)}</p></div>
-      <div class="bullet compact"><h2>今日主线</h2><p class="core-mainline">${html(data.core.mainline)}</p></div>
+      <div class="bullet compact"><h2>今日主线</h2><p class="core-mainline">${html(compactText(data.core.mainline, 240))}</p></div>
       <div class="panel status-strip">
         <div><div class="label">风险等级</div><div class="risk">${html(data.core.risk)}</div></div>
         <div><div class="label">市场状态</div><div class="state">${html(data.marketState || "板块分化")}</div></div>
@@ -293,12 +363,13 @@ function cardCoreCombined(data) {
 }
 
 function cardDashboard(data) {
-  const rows = data.dashboard.slice(1, 10);
+  const rows = data.dashboard.slice(1, 8);
   return shell({
-    page: 2,
+    page: 3,
     date: data.date,
-    kicker: "1. 市场仪表盘",
+    kicker: "1-2. 市场仪表盘与信号",
     body: `
+      <h1>市场仪表盘</h1>
       ${rows
         .map(
           (row) => `
@@ -315,7 +386,7 @@ function cardDashboard(data) {
 
 function cardSignals(data) {
   return shell({
-    page: 3,
+    page: 4,
     date: data.date,
     kicker: "2. 今天最重要的 3 个信号",
     body: data.signals
@@ -323,43 +394,52 @@ function cardSignals(data) {
         (signal) => `
         <div class="panel signal">
           <div class="signal-title"><h2>${html(signal.title)}</h2>${tag(signal.impact || "中性")}</div>
-          <p style="margin-top:8px;">${html(signal.conclusion)}</p>
-          <div class="field"><span>重点影响</span><p class="green">${html(signal.assets)}</p></div>
+          <p style="margin-top:8px;">${html(compactText(signal.conclusion, 120))}</p>
+          <div class="field"><span>重点影响</span><p class="green">${html(compactText(signal.assets, 90))}</p></div>
         </div>`
       )
       .join(""),
   });
 }
 
-function cardNews(data, newsItems, page, kicker = "3. 重点新闻拆解") {
+function newsField(label, value, className = "", maxLength = 150) {
+  return `<div class="news-field ${className}"><span>${html(label)}</span><p>${html(compactText(value, maxLength))}</p></div>`;
+}
+
+function cardNews(data, item, page, index) {
   return shell({
     page,
     date: data.date,
-    kicker,
-    body: newsItems
-      .map(
-        (item) => `
-        <div class="panel news">
-          <h2>${html(item.title)}</h2>
-          ${field("相关资产", item.assets, "assets")}
-          ${field("事件摘要", item.facts, "facts")}
-          ${field("意义", item.why, "why")}
-          ${field("A股产业链指引", item.aShare, "a-share")}
-        </div>`
-      )
-      .join(""),
+    kicker: "3. 重点新闻拆解",
+    body: `
+      <div class="news-page">
+        <div class="news-index">NEWS ${index}</div>
+        <div class="news-block">
+          <h1>${html(item.title)}</h1>
+          ${newsField("相关资产", item.assets, "assets", 80)}
+          ${newsField("事件摘要", item.facts, "facts", 190)}
+          ${item.market ? newsField("市场反应", item.market, "", 130) : ""}
+          ${newsField("意义", item.why, "", 170)}
+          ${newsField("A股产业链指引", item.aShare, "a-share", 155)}
+        </div>
+      </div>
+    `,
   });
 }
 
 function cardFocus(data) {
+  const aShareDirection =
+    data.aShare.impact && clean(data.aShare.impact).length > 6 ? data.aShare.impact : data.aShare.logic;
   return shell({
-    page: 6,
+    page: 9,
     date: data.date,
-    kicker: "5-6. 关注清单与普通投资者理解",
+    kicker: "A股映射与关注清单",
     body: `
-      <div class="bullet"><h2>最重要变量</h2><p>${html(data.focus.variable)}</p></div>
-      <div class="bullet"><h2>重点公司</h2><p>${html(data.focus.companies)}</p></div>
-      <div class="bullet"><h2>更准确的理解</h2><p>${html(data.plain.better)}</p></div>
+      <h1>接下来重点看什么</h1>
+      <div class="bullet"><h2>最重要变量</h2><p>${html(compactText(data.focus.variable, 150))}</p></div>
+      <div class="bullet"><h2>重点公司</h2><p>${html(compactText(data.focus.companies, 120))}</p></div>
+      <div class="bullet"><h2>A股大方向</h2><p>${html(compactText(aShareDirection, 190))}</p></div>
+      <div class="bullet"><h2>重点映射方向</h2><p>${html(compactText(data.aShare.directions, 150))}</p></div>
       <div class="cta"><span>完整日报与邮件订阅</span><strong>morninvest.com</strong></div>
     `,
   });
@@ -370,11 +450,11 @@ async function main() {
   const report = await latestDailyReport();
   const data = parseReport(report);
   const cards = [
+    cardCover(data),
     cardCoreCombined(data),
     cardDashboard(data),
     cardSignals(data),
-    cardNews(data, data.news.slice(0, 2), 4),
-    cardNews(data, data.news.slice(2, 4), 5, "3. 重点新闻拆解（续）"),
+    ...data.news.slice(0, 4).map((item, index) => cardNews(data, item, 5 + index, index + 1)),
     cardFocus(data),
   ];
 
