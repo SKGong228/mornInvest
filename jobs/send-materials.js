@@ -1,6 +1,10 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { sendEmail } = require("../api/_lib/resend");
+const {
+  getReadyReportForDate,
+  insertDelivery,
+} = require("../api/_lib/supabase");
 
 function getBeijingDate() {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -34,9 +38,23 @@ async function main() {
 
   await fs.access(zipPath);
 
+  const report = await getReadyReportForDate("daily", reportDate);
+  if (!report) {
+    throw new Error(`No ready daily report found for ${reportDate}.`);
+  }
+
   const attachment = await fileAttachment(zipPath);
   const results = [];
   for (const recipient of recipients) {
+    const existing = await findSentMaterialsDelivery({
+      reportId: report.id,
+      email: recipient,
+    });
+    if (existing) {
+      results.push({ recipient, status: "already_sent" });
+      continue;
+    }
+
     const sent = await sendEmail({
       to: recipient,
       subject: `MornInvest 运营素材包｜${reportDate}`,
@@ -63,10 +81,48 @@ async function main() {
       ].join("\n"),
       attachments: [attachment],
     });
+    await insertDelivery({
+      subscriber_id: null,
+      report_id: report.id,
+      email: recipient,
+      status: "sent",
+      provider: "resend-materials",
+      provider_message_id: sent.id || null,
+      sent_at: new Date().toISOString(),
+    });
     results.push({ recipient, status: "sent", id: sent.id || null });
   }
 
   console.log(JSON.stringify({ ok: true, report_date: reportDate, zip: zipPath, results }, null, 2));
+}
+
+async function findSentMaterialsDelivery({ reportId, email }) {
+  const { getSupabaseConfig } = require("../api/_lib/supabase");
+  const config = getSupabaseConfig();
+  if (!config) {
+    throw new Error("Supabase is not configured.");
+  }
+
+  const response = await fetch(
+    `${config.baseUrl}/rest/v1/email_deliveries?select=*&report_id=eq.${encodeURIComponent(
+      reportId
+    )}&email=eq.${encodeURIComponent(
+      email
+    )}&provider=eq.resend-materials&status=eq.sent&limit=1`,
+    {
+      headers: {
+        apikey: config.key,
+        Authorization: `Bearer ${config.key}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(`Supabase email_deliveries returned ${response.status}: ${text}`);
+  }
+  const rows = text ? JSON.parse(text) : [];
+  return rows[0] || null;
 }
 
 main().catch((error) => {
