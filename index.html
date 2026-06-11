@@ -292,58 +292,98 @@
         align-items: start;
       }
 
-      .archive-cta {
+      .latest-report {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 18px;
+        grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+        gap: 34px;
         align-items: center;
-        margin-top: 26px;
-        border: 1px solid #c8d8d6;
-        border-radius: 8px;
-        padding: 24px 26px;
+        margin-top: 34px;
+        border-top: 1px solid #cfd8df;
+        border-bottom: 1px solid #cfd8df;
+        padding: 28px 0;
         color: var(--ink);
-        background: #ffffff;
-        box-shadow: 0 14px 36px rgba(12, 17, 29, 0.10);
-        text-decoration: none;
       }
 
-      .archive-cta:hover {
-        border-color: #0f766e;
+      .latest-report-copy {
+        max-width: 680px;
       }
 
-      .archive-cta span {
+      .latest-report-label {
         display: block;
-        margin-bottom: 6px;
+        margin-bottom: 10px;
         color: var(--green);
         font-size: 13px;
         font-weight: 900;
-      }
-
-      .archive-cta strong {
-        display: block;
-        font-size: clamp(22px, 3vw, 32px);
-        line-height: 1.18;
         letter-spacing: 0;
       }
 
-      .archive-cta p {
-        margin: 8px 0 0;
+      .latest-report h3 {
+        margin: 0;
+        font-size: clamp(24px, 3vw, 34px);
+        line-height: 1.16;
+        letter-spacing: 0;
+      }
+
+      .latest-report p {
+        margin: 12px 0 0;
         color: var(--muted);
         font-size: 15px;
       }
 
-      .archive-cta b {
+      .latest-report-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .latest-report-meta span {
+        border: 1px solid #d3dde6;
+        border-radius: 999px;
+        padding: 5px 10px;
+        color: #334155;
+        background: rgba(255, 255, 255, 0.62);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .latest-report-side {
+        justify-self: end;
+        width: min(100%, 360px);
+      }
+
+      .latest-report-stat {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 10px 14px;
+        align-items: baseline;
+        margin-bottom: 16px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .latest-report-stat strong {
+        color: var(--ink);
+        font-size: 15px;
+      }
+
+      .latest-report-action {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 46px;
+        width: 100%;
+        min-height: 48px;
         border-radius: 8px;
-        padding: 0 16px;
+        padding: 0 18px;
         color: #ffffff;
         background: var(--green);
         font-size: 14px;
         font-weight: 800;
-        white-space: nowrap;
+        text-decoration: none;
+      }
+
+      .latest-report-action:hover {
+        background: #0b5f58;
       }
 
       .brief {
@@ -710,8 +750,13 @@
         .signup,
         .cta-box,
         .brief-layout,
-        .archive-cta {
+        .latest-report {
           grid-template-columns: 1fr;
+        }
+
+        .latest-report-side {
+          justify-self: stretch;
+          width: 100%;
         }
 
         .signup .button {
@@ -820,19 +865,33 @@
 
       <section class="section" id="sample">
         <div class="container">
-          <p class="section-kicker">晨报样章</p>
-          <h2 class="section-title">把事件放进科技股语境</h2>
+          <p class="section-kicker">日报阅读体验</p>
+          <h2 class="section-title">从新闻事件到科技股主线</h2>
           <p class="section-lede">
-            下方为格式样例，用来展示最终阅读体验。正式版本会替换为当日真实来源、发布时间和原文链接。
+            MornInvest 不是简单翻译新闻，而是把公开来源、市场反应、产业链映射和后续观察点整理成一份可读的中文晨报。
           </p>
-          <a class="archive-cta" href="./reports/index.html">
-            <span>最新日报</span>
-            <div>
-              <strong>查看已经生成的完整美股科技晨报</strong>
-              <p>邮件适合提醒，网页适合阅读、复制和转发。这里默认展示最新一版 ready 日报。</p>
+          <div class="latest-report" aria-label="最新一期日报入口">
+            <div class="latest-report-copy">
+              <span class="latest-report-label">最新一期</span>
+              <h3>阅读今日 MornInvest 美股科技晨报</h3>
+              <p>
+                网页版保留原文链接、市场仪表盘、重点事件拆解和 A 股科技链条参考，适合完整阅读、复制和转发。
+              </p>
+              <div class="latest-report-meta" aria-label="日报特性">
+                <span>来源可追溯</span>
+                <span>市场仪表盘</span>
+                <span>A 股映射</span>
+                <span>每日更新</span>
+              </div>
             </div>
-            <b>打开日报</b>
-          </a>
+            <div class="latest-report-side">
+              <div class="latest-report-stat">
+                <strong>Daily Brief</strong><span>最新日报默认展示当日版本</span>
+                <strong>Web Archive</strong><span>网页版本适合转发和二次阅读</span>
+              </div>
+              <a class="latest-report-action" href="./reports/index.html">阅读最新日报</a>
+            </div>
+          </div>
 
           <div class="brief-layout">
             <article class="brief" aria-label="样例晨报">
