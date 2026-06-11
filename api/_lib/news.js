@@ -12,6 +12,36 @@ const OFFICIAL_RSS_SOURCES = [
     url: "https://investors.broadcom.com/rss/news-releases.xml",
     tickers: ["AVGO"],
   },
+  {
+    source: "Oracle Investor Relations",
+    url: "https://investor.oracle.com/rss/news-releases.xml",
+    tickers: ["ORCL"],
+  },
+  {
+    source: "Micron Investor Relations",
+    url: "https://investors.micron.com/rss/news-releases.xml",
+    tickers: ["MU"],
+  },
+  {
+    source: "Marvell Investor Relations",
+    url: "https://investor.marvell.com/rss/news-releases.xml",
+    tickers: ["MRVL"],
+  },
+  {
+    source: "Coherent Investor Relations",
+    url: "https://investors.coherent.com/rss/news-releases.xml",
+    tickers: ["COHR"],
+  },
+  {
+    source: "Lumentum Investor Relations",
+    url: "https://investor.lumentum.com/rss/news-releases.xml",
+    tickers: ["LITE"],
+  },
+  {
+    source: "Applied Optoelectronics Investor Relations",
+    url: "https://investors.ao-inc.com/rss/news-releases.xml",
+    tickers: ["AAOI"],
+  },
 ];
 const TECH_TICKER_GROUPS = {
   aiComputeSemis: ["NVDA", "AVGO", "AMD", "MRVL", "MU", "INTC", "QCOM", "ARM"],
@@ -61,6 +91,8 @@ const SOURCE_REGISTRY = [
       "investors.ao-inc.com",
       "investors.arista.com",
       "investor.cisco.com",
+      "investor.oracle.com",
+      "oracle.com",
       "investor.salesforce.com",
       "investors.servicenow.com",
       "adobe.com",
@@ -84,14 +116,13 @@ const SOURCE_REGISTRY = [
       "theinformation.com",
       "nikkei.com",
       "nikkei.com/asia",
+      "marketwatch.com",
     ],
   },
   {
     rank: 3,
     type: "market_media",
     domains: [
-      "finance.yahoo.com",
-      "marketwatch.com",
       "barrons.com",
       "investors.com",
       "kiplinger.com",
@@ -112,12 +143,21 @@ const SOURCE_REGISTRY = [
       "9to5mac.com",
     ],
   },
+  {
+    rank: 4,
+    type: "auxiliary_aggregator",
+    domains: [
+      "finance.yahoo.com",
+      "247wallst.com",
+      "fool.com",
+      "marketbeat.com",
+      "trefis.com",
+    ],
+  },
 ];
 
 const EXCLUDED_DOMAINS = new Set([
-  "247wallst.com",
   "benzinga.com",
-  "fool.com",
   "zacks.com",
   "investorplace.com",
   "tipranks.com",
@@ -389,6 +429,19 @@ function relevanceScore(item) {
   return sourceScore + tickerScore + themeScore + impactScore;
 }
 
+function sourceTrustBucket(item) {
+  if (item.source_rank <= 1) {
+    return "primary";
+  }
+  if (item.source_rank === 2) {
+    return "tier_1_media";
+  }
+  if (item.source_rank === 3) {
+    return "trusted_secondary";
+  }
+  return "auxiliary_only";
+}
+
 function isLowQualityTitle(title) {
   return EXCLUDED_TITLE_PATTERNS.some((pattern) => pattern.test(title));
 }
@@ -577,6 +630,7 @@ function normalizeOfficialRssArticle(article) {
     summary: compact(article.description || title, 700),
     source_rank: sourceProfile.source_rank,
     source_type: sourceProfile.source_type,
+    source_trust: sourceTrustBucket(sourceProfile),
     tickers,
     themes,
   };
@@ -609,6 +663,7 @@ function normalizeRssArticle(article) {
     summary: compact(article.description || title, 700),
     source_rank: sourceProfile.source_rank,
     source_type: sourceProfile.source_type,
+    source_trust: sourceTrustBucket(sourceProfile),
     tickers,
     themes,
   };
@@ -647,6 +702,7 @@ function normalizeArticle(article) {
     summary: title,
     source_rank: sourceProfile.source_rank,
     source_type: sourceProfile.source_type,
+    source_trust: sourceTrustBucket(sourceProfile),
     tickers,
     themes,
   };
@@ -713,8 +769,12 @@ async function collectTechMarketSourceItems({ reportDate } = {}) {
 
   const trustedQueries = [
     'domain:reuters.com (NVIDIA OR Broadcom OR AMD OR Micron OR Marvell OR Intel OR Qualcomm OR ASML OR TSMC OR Microsoft OR Apple OR Amazon OR Google OR Meta OR Tesla OR Oracle) (AI OR chip OR semiconductor OR cloud OR earnings)',
+    'domain:cnbc.com (NVIDIA OR Broadcom OR AMD OR Micron OR Marvell OR Intel OR Qualcomm OR ASML OR TSMC OR Microsoft OR Apple OR Amazon OR Google OR Meta OR Tesla OR Oracle) (AI OR chip OR semiconductor OR cloud OR earnings OR Nasdaq)',
+    'domain:marketwatch.com (NVIDIA OR Broadcom OR AMD OR Micron OR Marvell OR Intel OR Qualcomm OR ASML OR TSMC OR Microsoft OR Apple OR Amazon OR Google OR Meta OR Tesla OR Oracle) (AI OR chip OR semiconductor OR cloud OR earnings OR Nasdaq)',
     'domain:apnews.com (NVIDIA OR Broadcom OR AMD OR Micron OR Marvell OR Intel OR Qualcomm OR ASML OR TSMC OR Microsoft OR Apple OR Amazon OR Google OR Meta OR Tesla OR Oracle OR Nasdaq) (AI OR chip OR semiconductor OR tech OR market)',
     'domain:reuters.com (Marvell OR MRVL OR Corning OR GLW OR Coherent OR COHR OR Lumentum OR LITE OR "Applied Optoelectronics" OR AAOI) (AI OR "data center" OR optical OR photonics OR transceiver OR networking OR ethernet OR earnings)',
+    'domain:cnbc.com (Marvell OR MRVL OR Corning OR GLW OR Coherent OR COHR OR Lumentum OR LITE OR "Applied Optoelectronics" OR AAOI) (AI OR "data center" OR optical OR photonics OR transceiver OR networking OR ethernet OR earnings)',
+    'domain:marketwatch.com (Marvell OR MRVL OR Corning OR GLW OR Coherent OR COHR OR Lumentum OR LITE OR "Applied Optoelectronics" OR AAOI) (AI OR "data center" OR optical OR photonics OR transceiver OR networking OR ethernet OR earnings)',
     'domain:apnews.com (Marvell OR MRVL OR Corning OR GLW OR Coherent OR COHR OR Lumentum OR LITE OR "Applied Optoelectronics" OR AAOI) (AI OR "data center" OR optical OR photonics OR transceiver OR networking OR ethernet OR earnings)',
   ];
   const discoveryQueries = [

@@ -198,9 +198,11 @@ function formatCnbcQuote(symbolConfig, quote) {
       asset: symbolConfig.label,
       symbol: symbolConfig.symbol,
       latest: String(round(latest, 2)),
-      change: Number.isFinite(changePct) ? `${round(changePct, 2)}%` : "暂无可靠输入",
-      performance: Number.isFinite(changePct) ? `${round(latest, 2)} / ${round(changePct, 2)}%` : String(round(latest, 2)),
+      change: formatSignedPct(changePct),
+      performance: Number.isFinite(changePct) ? `${round(latest, 2)} / ${formatSignedPct(changePct)}` : String(round(latest, 2)),
       note: symbolConfig.note,
+      data_scope: "latest_quote",
+      source: "CNBC quote API",
     };
   }
 
@@ -208,9 +210,11 @@ function formatCnbcQuote(symbolConfig, quote) {
     asset: symbolConfig.label,
     symbol: symbolConfig.symbol,
     latest: String(round(latest, 2)),
-    change: Number.isFinite(changePct) ? `${round(changePct, 2)}%` : "暂无可靠输入",
-    performance: Number.isFinite(changePct) ? `${round(changePct, 2)}%` : "暂无可靠输入",
+    change: formatSignedPct(changePct),
+    performance: formatSignedPct(changePct),
     note: symbolConfig.note,
+    data_scope: "latest_quote",
+    source: "CNBC quote API",
   };
 }
 
@@ -230,9 +234,11 @@ function formatQuote(symbolConfig, chart) {
       asset: symbolConfig.label,
       symbol: symbolConfig.symbol,
       latest: String(round(latest, 2)),
-      change: `${round(changePct, 2)}%`,
-      performance: `${round(latest, 2)} / ${round(changePct, 2)}%`,
+      change: formatSignedPct(changePct),
+      performance: `${round(latest, 2)} / ${formatSignedPct(changePct)}`,
       note: symbolConfig.note,
+      data_scope: "daily_close",
+      source: "Yahoo Finance chart API",
     };
   }
 
@@ -240,9 +246,11 @@ function formatQuote(symbolConfig, chart) {
     asset: symbolConfig.label,
     symbol: symbolConfig.symbol,
     latest: String(round(latest, 2)),
-    change: `${round(changePct, 2)}%`,
-    performance: `${round(changePct, 2)}%`,
+    change: formatSignedPct(changePct),
+    performance: formatSignedPct(changePct),
     note: symbolConfig.note,
+    data_scope: "daily_close",
+    source: "Yahoo Finance chart API",
   };
 }
 
@@ -334,6 +342,7 @@ function buildSectorRows(quotes) {
           representatives: members.map((quote) => quote.asset).join(" / "),
           leaders: members.map((quote) => `${quote.asset} ${quote.performance}`).join(" / "),
           note: group.note,
+          methodology: "宏观风险不计算篮子均值，分别展示 10Y 美债收益率和 VIX。",
         };
       }
 
@@ -352,6 +361,65 @@ function buildSectorRows(quotes) {
         representatives: members.map((quote) => quote.asset).join(" / "),
         leaders: leaders || "暂无可靠输入",
         note: group.note,
+        methodology:
+          group.sector === "光模块 / 光互连"
+            ? "MornInvest 等权光互连篮子：COHR、LITE、AAOI、GLW 的收盘涨跌幅算术平均值，非交易所官方指数。"
+            : "MornInvest 等权板块篮子：代表资产收盘涨跌幅算术平均值，非交易所官方指数。",
+      };
+    })
+    .filter(Boolean);
+}
+
+function buildIndicatorRows(quotes) {
+  const bySymbol = new Map(quotes.map((quote) => [quote.symbol, quote]));
+  const rows = [
+    {
+      indicator: "Nasdaq",
+      symbols: ["^IXIC"],
+      meaning: "科技成长股整体风险偏好",
+    },
+    {
+      indicator: "S&P 500",
+      symbols: ["^GSPC"],
+      meaning: "美股大盘风险偏好",
+    },
+    {
+      indicator: "SMH",
+      symbols: ["SMH"],
+      meaning: "半导体 ETF 风险偏好",
+    },
+    {
+      indicator: "SOXX",
+      symbols: ["SOXX"],
+      meaning: "半导体 ETF 风险偏好",
+    },
+    {
+      indicator: "10Y 美债收益率",
+      symbols: ["^TNX"],
+      meaning: "科技股估值压力来源",
+    },
+    {
+      indicator: "VIX",
+      symbols: ["^VIX"],
+      meaning: "市场波动率与风险情绪",
+    },
+  ];
+
+  return rows
+    .map((row) => {
+      const quote = row.symbols.map((symbol) => bySymbol.get(symbol)).find(Boolean);
+      if (!quote) {
+        return null;
+      }
+      return {
+        indicator: row.indicator,
+        latest: quote.latest || "暂无可靠输入",
+        day_change: quote.change || "暂无可靠输入",
+        meaning: row.meaning,
+        symbol: quote.symbol,
+        data_scope: quote.data_scope || (quote.symbol === "^TNX" ? "official_daily" : "latest_quote"),
+        source: quote.source || (quote.symbol === "^TNX" ? quote.source : "market quote API"),
+        trade_date: quote.trade_date || null,
       };
     })
     .filter(Boolean);
@@ -392,8 +460,11 @@ async function collectMarketDashboard({ reportDate } = {}) {
     published_at: new Date().toISOString(),
     type: "market_dashboard",
     summary: "Latest available daily market data for major US technology assets and risk indicators.",
+    data_policy:
+      "指标仪表盘逐项展示，不合并不同指标。股票、ETF 和指数默认使用最新可得报价或日线收盘口径；10Y 美债收益率使用 U.S. Treasury 官方日度收益率；自定义板块篮子必须标注等权算法。",
     market_state: inferMarketState(quotes),
     quotes,
+    indicator_rows: buildIndicatorRows(quotes),
     sector_rows: buildSectorRows(quotes),
   };
 }
