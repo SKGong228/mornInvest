@@ -14,3 +14,4 @@ crons = [
 GITHUB_OWNER = "SKGong228"
 GITHUB_REPO = "mornInvest"
 GITHUB_REF = "main"
+SEND_PAUSED = "true"

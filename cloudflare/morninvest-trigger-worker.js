@@ -46,6 +46,17 @@ function requestedJobsForSchedule(scheduledTime) {
   return [];
 }
 
+function isSendPaused(env) {
+  return String(env.SEND_PAUSED || "").toLowerCase() === "true";
+}
+
+function filterPausedJobs(env, jobs) {
+  if (!isSendPaused(env)) {
+    return jobs;
+  }
+  return jobs.filter((job) => job !== "send");
+}
+
 function workflowInputs(job, reportDate) {
   if (job === "generate") {
     return {
@@ -100,11 +111,14 @@ async function dispatchWorkflow(env, workflowFile, inputs) {
 
 async function runJobs(env, jobs, reportDate) {
   const results = [];
-  for (const job of jobs) {
+  for (const job of filterPausedJobs(env, jobs)) {
     const workflowFile = WORKFLOWS[job];
     if (!workflowFile) throw new Error(`Unsupported job: ${job}`);
     const result = await dispatchWorkflow(env, workflowFile, workflowInputs(job, reportDate));
     results.push({ job, ...result });
+  }
+  if (jobs.includes("send") && isSendPaused(env)) {
+    results.push({ job: "send", status: "skipped", reason: "SEND_PAUSED=true" });
   }
   return results;
 }
@@ -131,7 +145,8 @@ export default {
   async scheduled(event, env, ctx) {
     const reportDate = beijingDate(new Date(event.scheduledTime));
     const jobs = requestedJobsForSchedule(event.scheduledTime);
-    if (!jobs.length) {
+    const runnableJobs = filterPausedJobs(env, jobs);
+    if (!runnableJobs.length && !jobs.includes("send")) {
       console.log(`No jobs mapped for scheduledTime=${event.scheduledTime}`);
       return;
     }
